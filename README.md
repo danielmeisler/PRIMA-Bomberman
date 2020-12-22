@@ -1,2 +1,0 @@
-# PRIMA-Bomberman
-Endabgabe PRIMA
