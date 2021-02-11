@@ -813,7 +813,7 @@ var Bomberman;
     window.addEventListener("load", hndLoad);
     Bomberman.clrWhite = fc.Color.CSS("WHITE");
     let cmpAudio;
-    let backgroundTheme = new fc.Audio("../Assets/sounds/theme.mp3");
+    let backgroundTheme = new fc.Audio("Assets/sounds/theme.mp3");
     Bomberman.root = new fc.Node("Root");
     Bomberman.levelRoot = new fc.Node("LevelNode");
     Bomberman.floorNode = new fc.Node("FloorNode");
@@ -862,7 +862,7 @@ var Bomberman;
     }
     async function hndAvatar() {
         let txtAvatar = new fc.TextureImage();
-        txtAvatar.load("../Assets/avatar/avatar_sprites.png");
+        txtAvatar.load("Assets/avatar/avatar_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtAvatar);
         Bomberman.Avatar.generateSprites(coatSprite);
         Bomberman.avatar = new Bomberman.Avatar(new fc.Vector2(1, 1));
@@ -870,7 +870,7 @@ var Bomberman;
     }
     async function hndEnemies() {
         let txtEnemy = new fc.TextureImage();
-        txtEnemy.load("../Assets/enemies/enemy_sprites.png");
+        txtEnemy.load("Assets/enemies/enemy_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
         Bomberman.Enemy.generateSprites(coatSprite);
         Bomberman.enemies = new Bomberman.Enemy(new fc.Vector2(Bomberman.arenaSize.x - 2, Bomberman.arenaSize.y - 2));
@@ -879,28 +879,28 @@ var Bomberman;
     }
     async function hndBomb() {
         let txtBomb = new fc.TextureImage();
-        txtBomb.load("../Assets/items/bomb_sprites.png");
+        txtBomb.load("Assets/items/bomb_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtBomb);
         let txtBombExplode = new fc.TextureImage();
-        txtBombExplode.load("../Assets/items/bomb_explode.png");
+        txtBombExplode.load("Assets/items/bomb_explode.png");
         let coatSprite2 = new fc.CoatTextured(Bomberman.clrWhite, txtBombExplode);
         Bomberman.Bomb.generateSprites(coatSprite, coatSprite2);
     }
     async function hndFlames() {
         let txtFlames = new fc.TextureImage();
-        txtFlames.load("../Assets/items/flames_sprites.png");
+        txtFlames.load("Assets/items/flames_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtFlames);
         Bomberman.Flames.generateSprites(coatSprite);
     }
     async function hndPortal() {
         let txtTeleport = new fc.TextureImage();
-        txtTeleport.load("../Assets/tiles/portal_sprites.png");
+        txtTeleport.load("Assets/tiles/portal_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtTeleport);
         Bomberman.Portal.generateSprites(coatSprite);
     }
     async function hndItems() {
         let txtItems = new fc.TextureImage();
-        txtItems.load("../Assets/items/items_sprites.png");
+        txtItems.load("Assets/items/items_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtItems);
         Bomberman.Items.generateSprites(coatSprite);
     }

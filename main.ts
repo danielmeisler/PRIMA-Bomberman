@@ -7,7 +7,7 @@ namespace Bomberman {
   export let viewport: fc.Viewport;
 
   let cmpAudio: fc.ComponentAudio;
-  let backgroundTheme: fc.Audio = new fc.Audio("../Assets/sounds/theme.mp3");
+  let backgroundTheme: fc.Audio = new fc.Audio("Assets/sounds/theme.mp3");
 
   export let root: fc.Node = new fc.Node("Root");
   export let levelRoot: fc.Node = new fc.Node("LevelNode");
@@ -77,7 +77,7 @@ namespace Bomberman {
   
   async function hndAvatar(): Promise<Avatar> {
     let txtAvatar: fc.TextureImage = new fc.TextureImage();
-    txtAvatar.load("../Assets/avatar/avatar_sprites.png");
+    txtAvatar.load("Assets/avatar/avatar_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtAvatar);
     Avatar.generateSprites(coatSprite);
 
@@ -88,7 +88,7 @@ namespace Bomberman {
 
   async function hndEnemies(): Promise<Enemy> {
     let txtEnemy: fc.TextureImage = new fc.TextureImage();
-    txtEnemy.load("../Assets/enemies/enemy_sprites.png");
+    txtEnemy.load("Assets/enemies/enemy_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtEnemy);
     Enemy.generateSprites(coatSprite);
 
@@ -100,31 +100,31 @@ namespace Bomberman {
 
   async function hndBomb(): Promise<void> {
     let txtBomb: fc.TextureImage = new fc.TextureImage();
-    txtBomb.load("../Assets/items/bomb_sprites.png");
+    txtBomb.load("Assets/items/bomb_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtBomb);
     let txtBombExplode: fc.TextureImage = new fc.TextureImage();
-    txtBombExplode.load("../Assets/items/bomb_explode.png");
+    txtBombExplode.load("Assets/items/bomb_explode.png");
     let coatSprite2: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtBombExplode);
     Bomb.generateSprites(coatSprite, coatSprite2);
   }
 
   async function hndFlames(): Promise<void> {
     let txtFlames: fc.TextureImage = new fc.TextureImage();
-    txtFlames.load("../Assets/items/flames_sprites.png");
+    txtFlames.load("Assets/items/flames_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtFlames);
     Flames.generateSprites(coatSprite);
   }
 
   async function hndPortal(): Promise<void> {
     let txtTeleport: fc.TextureImage = new fc.TextureImage();
-    txtTeleport.load("../Assets/tiles/portal_sprites.png");
+    txtTeleport.load("Assets/tiles/portal_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtTeleport);
     Portal.generateSprites(coatSprite);
   }
 
   async function hndItems(): Promise<void> {
     let txtItems: fc.TextureImage = new fc.TextureImage();
-    txtItems.load("../Assets/items/items_sprites.png");
+    txtItems.load("Assets/items/items_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtItems);
     Items.generateSprites(coatSprite);
   }
