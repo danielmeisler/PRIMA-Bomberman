@@ -20,7 +20,6 @@ namespace Bomberman {
 
       this.sprite = new fcAid.NodeSprite("PortalSprite");
       this.sprite.addComponent(new fc.ComponentTransform());
-      //this.sprite.mtxLocal.translateZ(0.0001);
       this.appendChild(this.sprite);
 
       this.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Portal.animations["PORTAL"]);

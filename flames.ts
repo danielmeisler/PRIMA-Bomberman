@@ -27,10 +27,6 @@ namespace Bomberman {
       this.sprite.setFrameDirection(1);
       this.sprite.framerate = 6;
 
-      //console.log(_position.toVector3());
-      //this.placeFlames(_position.toVector3());
-
-      //fc.Time.game.setTimer(1000, 1, this.placeFlames(this.mtxLocal.translate).bind(this));
     }
 
     public static generateSprites(_spritesheet: fc.CoatTextured): void {

@@ -465,7 +465,8 @@ var Bomberman;
     class ExplodableBlock extends Bomberman.GameObject {
         constructor(_size, _position) {
             super("ExplodableBlock", _size, _position);
-            let txtWall = new fc.TextureImage("Assets/tiles/ExplodableBlock.png");
+            let txtWall = new fc.TextureImage();
+            txtWall.load("Assets/tiles/ExplodableBlock.png");
             let mtrWall = new fc.Material("ExplodableBlockMaterial", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtWall));
             let cmpMaterial = new fc.ComponentMaterial(mtrWall);
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
@@ -495,9 +496,6 @@ var Bomberman;
             this.sprite.showFrame(0);
             this.sprite.setFrameDirection(1);
             this.sprite.framerate = 6;
-            //console.log(_position.toVector3());
-            //this.placeFlames(_position.toVector3());
-            //fc.Time.game.setTimer(1000, 1, this.placeFlames(this.mtxLocal.translate).bind(this));
         }
         static generateSprites(_spritesheet) {
             Flames.animations = {};
@@ -614,7 +612,8 @@ var Bomberman;
     class Floor extends Bomberman.GameObject {
         constructor(_size, _position) {
             super("Floor", _size, _position);
-            let txtFloor = new fc.TextureImage("Assets/tiles/BackgroundTile.png");
+            let txtFloor = new fc.TextureImage();
+            txtFloor.load("Assets/tiles/BackgroundTile.png");
             let mtrFloor = new fc.Material("Floor", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtFloor));
             let cmpMaterial = new fc.ComponentMaterial(mtrFloor);
             this.mtxLocal.translation = new fc.Vector3(_position.x + _size.x / 2 - 0.5, _position.y + _size.y / 2 - 0.5, -0.000001);
@@ -919,7 +918,6 @@ var Bomberman;
             this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
             this.sprite = new fcAid.NodeSprite("PortalSprite");
             this.sprite.addComponent(new fc.ComponentTransform());
-            //this.sprite.mtxLocal.translateZ(0.0001);
             this.appendChild(this.sprite);
             this.sprite.setAnimation(Portal.animations["PORTAL"]);
             this.sprite.showFrame(0);
@@ -987,8 +985,6 @@ var Bomberman;
             let cmpMaterial = new fc.ComponentMaterial(mtrWall);
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
             this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
-            //this.mtxLocal.translation = new fc.Vector3(_position.x + _size.x / 2, _position.y + _size.y / 2, 0);
-            //cmpMaterial.pivot.scale(new fc.Vector2(_size.x / 1, _size.y / 1));
             this.addComponent(cmpMaterial);
         }
     }
