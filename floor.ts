@@ -6,7 +6,7 @@ namespace Bomberman {
     public constructor(_size: fc.Vector2, _position: fc.Vector2) {
       super("Floor", _size, _position);
 
-      let txtFloor: fc.TextureImage = new fc.TextureImage("../Assets/tiles/BackgroundTile.png");
+      let txtFloor: fc.TextureImage = new fc.TextureImage("Assets/tiles/BackgroundTile.png");
       let mtrFloor: fc.Material = new fc.Material("Floor", fc.ShaderTexture, new fc.CoatTextured(clrWhite, txtFloor));
   
       let cmpMaterial: fc.ComponentMaterial = new fc.ComponentMaterial(mtrFloor);

@@ -5,8 +5,8 @@ namespace Bomberman {
   import fcAid = FudgeAid;
 
   let cmpAudio: fc.ComponentAudio;
-  let soundWalk: fc.Audio = new fc.Audio("../Assets/sounds/walk.wav");
-  let soundItems: fc.Audio = new fc.Audio("../Assets/sounds/items.mp3");
+  let soundWalk: fc.Audio = new fc.Audio("Assets/sounds/walk.wav");
+  let soundItems: fc.Audio = new fc.Audio("Assets/sounds/items.mp3");
 
   export class Avatar extends GameObject {
     //private static readonly mtrColorAvatar: fc.Material = new fc.Material("BaseColor", fc.ShaderUniColor, new fc.CoatColored(fc.Color.CSS("YELLOW")));

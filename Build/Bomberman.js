@@ -42,8 +42,8 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundWalk = new fc.Audio("../Assets/sounds/walk.wav");
-    let soundItems = new fc.Audio("../Assets/sounds/items.mp3");
+    let soundWalk = new fc.Audio("Assets/sounds/walk.wav");
+    let soundItems = new fc.Audio("Assets/sounds/items.mp3");
     class Avatar extends Bomberman.GameObject {
         constructor(_position) {
             super("Bomberman", new fc.Vector2(0.8, 0.8), _position);
@@ -195,7 +195,7 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundBomb = new fc.Audio("../Assets/sounds/explosion.wav");
+    let soundBomb = new fc.Audio("Assets/sounds/explosion.wav");
     class Bomb extends Bomberman.GameObject {
         constructor(_size, _position) {
             super("Bomb", _size, _position);
@@ -465,7 +465,7 @@ var Bomberman;
     class ExplodableBlock extends Bomberman.GameObject {
         constructor(_size, _position) {
             super("ExplodableBlock", _size, _position);
-            let txtWall = new fc.TextureImage("../Assets/tiles/ExplodableBlock.png");
+            let txtWall = new fc.TextureImage("Assets/tiles/ExplodableBlock.png");
             let mtrWall = new fc.Material("ExplodableBlockMaterial", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtWall));
             let cmpMaterial = new fc.ComponentMaterial(mtrWall);
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
@@ -480,7 +480,7 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundHit = new fc.Audio("../Assets/sounds/hit.wav");
+    let soundHit = new fc.Audio("Assets/sounds/hit.wav");
     Bomberman.flameDistance = 2;
     class Flames extends Bomberman.GameObject {
         constructor(_position) {
@@ -614,7 +614,7 @@ var Bomberman;
     class Floor extends Bomberman.GameObject {
         constructor(_size, _position) {
             super("Floor", _size, _position);
-            let txtFloor = new fc.TextureImage("../Assets/tiles/BackgroundTile.png");
+            let txtFloor = new fc.TextureImage("Assets/tiles/BackgroundTile.png");
             let mtrFloor = new fc.Material("Floor", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtFloor));
             let cmpMaterial = new fc.ComponentMaterial(mtrFloor);
             this.mtxLocal.translation = new fc.Vector3(_position.x + _size.x / 2 - 0.5, _position.y + _size.y / 2 - 0.5, -0.000001);
@@ -910,7 +910,7 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundTeleport = new fc.Audio("../Assets/sounds/teleport.wav");
+    let soundTeleport = new fc.Audio("Assets/sounds/teleport.wav");
     let portalArray = [];
     class Portal extends Bomberman.GameObject {
         constructor(_position, portalID) {
@@ -981,7 +981,7 @@ var Bomberman;
     class Wall extends Bomberman.GameObject {
         constructor(_size, _position) {
             super("Wall", _size, _position);
-            let txtWall = new fc.TextureImage("../Assets/tiles/SolidBlock.png");
+            let txtWall = new fc.TextureImage("Assets/tiles/SolidBlock.png");
             let mtrWall = new fc.Material("BorderWall", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtWall));
             let cmpMaterial = new fc.ComponentMaterial(mtrWall);
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
