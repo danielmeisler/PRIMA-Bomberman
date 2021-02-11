@@ -70,7 +70,7 @@ namespace Bomberman {
       }
       else if (event.code == fc.KEYBOARD_CODE.SPACE) {
         if (countBombs < maxBomb) {
-          levelRoot.appendChild(new Bomb(fc.Vector2.ONE(1), new fc.Vector2(avatar.mtxLocal.translation.x, avatar.mtxLocal.translation.y)));
+          levelRoot.appendChild(new Bomb(fc.Vector2.ONE(1), new fc.Vector2(avatar.mtxLocal.translation.x, avatar.mtxLocal.translation.y), 0));
           countBombs++;
         }
       }

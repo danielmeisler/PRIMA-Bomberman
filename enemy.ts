@@ -1,10 +1,15 @@
 namespace Bomberman {
   import fc = FudgeCore;
   import fcAid = FudgeAid;
+
+  export enum STATE {
+    HUNT, CHECK, FLEE
+  }
   
 
   export class Enemy extends GameObject {
     private static animations: fcAid.SpriteSheetAnimations;
+    public state: STATE = STATE.HUNT;
     public job: WALK = WALK.DOWN;
     public tempPos: fc.Vector3;
     public sprite: fcAid.NodeSprite;
@@ -25,7 +30,9 @@ namespace Bomberman {
       this.sprite.showFrame(0);
       this.sprite.setFrameDirection(1);
       this.sprite.framerate = 6;
-      fc.Time.game.setTimer(1000, 1, this.findPlayer);
+
+      this.changeState(this.state);
+      //fc.Time.game.setTimer(1000, 1, this.findPlayer);
     }
 
     public static generateSprites(_spritesheet: fc.CoatTextured): void {
@@ -59,6 +66,11 @@ namespace Bomberman {
           enemies.mtxLocal.translation = this.tempPos;
         }
       }
+      for (let flames of levelRoot.getChildrenByName("Flames")) {
+        if (enemies.checkCollision(<GameObject>flames)) {
+          enemies.mtxLocal.translation = this.tempPos;
+        }
+      }
       for (let avatar of root.getChildrenByName("Bomberman")) {
         if (enemies.checkCollision(<GameObject>avatar)) {
           enemies.mtxLocal.translation = this.tempPos;
@@ -77,6 +89,21 @@ namespace Bomberman {
       let positionX: fc.Vector2;
       let positionY: fc.Vector2;
 
+      for (let bomb of levelRoot.getChildrenByName("Bomb")) {
+        if (this.mtxLocal.translation.toVector2().equals(bomb.mtxLocal.translation.toVector2())) {
+          
+          if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x + 1, this.mtxLocal.translation.y)) == false) {
+            this.walkEnemies(WALK.RIGHT);
+          } else if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y - 1)) == false) {
+            this.walkEnemies(WALK.DOWN);
+          } else if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x - 1, this.mtxLocal.translation.y)) == false) {
+            this.walkEnemies(WALK.LEFT);
+          } else if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y + 1)) == false) {
+            this.walkEnemies(WALK.UP);
+          }
+
+        }
+      }
 
       for (let i: number = 1; i <= flameDistance; i++) {
         positionX = new fc.Vector2(_position.x + i, _position.y);
@@ -86,8 +113,7 @@ namespace Bomberman {
         }
 
         if (this.checkBombs(positionX) == true) {
-          console.log("Gefahr");
-          this.walkEnemies(WALK.LEFT);
+          this.fleeBomb("left");
         }
 
         if (this.detectPlayer(positionX) == true) {
@@ -103,11 +129,10 @@ namespace Bomberman {
         }
 
         if (this.checkBombs(positionY) == true) {
-          console.log("Gefahr");
-          this.walkEnemies(WALK.DOWN);
+          this.fleeBomb("down");
         }
 
-        if (this.detectPlayer(positionX) == true) {
+        if (this.detectPlayer(positionY) == true) {
           this.bombPlayer();
         }
       }
@@ -120,8 +145,7 @@ namespace Bomberman {
         }
 
         if (this.checkBombs(positionX) == true) {
-          console.log("Gefahr");
-          this.walkEnemies(WALK.RIGHT);
+          this.fleeBomb("right");
         }
 
         if (this.detectPlayer(positionX) == true) {
@@ -136,11 +160,10 @@ namespace Bomberman {
         }
 
         if (this.checkBombs(positionY) == true) {
-          console.log("Gefahr");
-          this.walkEnemies(WALK.UP);
+          this.fleeBomb("up");
         }
 
-        if (this.detectPlayer(positionX) == true) {
+        if (this.detectPlayer(positionY) == true) {
           this.bombPlayer();
         }
       }
@@ -167,11 +190,11 @@ namespace Bomberman {
           return true;
         }
       }
-      for (let bomb of levelRoot.getChildrenByName("Flames")) {
+/*       for (let bomb of levelRoot.getChildrenByName("Flames")) {
         if (_position.equals(bomb.mtxLocal.translation.toVector2())) {
           return true;
         }
-      }
+      } */
       return false;
     }
 
@@ -208,16 +231,23 @@ namespace Bomberman {
       this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
     }
 
-    private findPlayer = (): void => {
-      /*       for (let xSize: number = 0; xSize < arenaSize.x; xSize++) {
-              for (let ySize: number = 0; ySize < arenaSize.y; ySize++) {
-                let destinationVector: fc.Vector3 = new fc.Vector3(xSize, ySize, 0);
-                if (avatar.mtxLocal.translation.equals(destinationVector)) {
-                  console.log(destinationVector);
-                }
-              }
-            } */
+    private changeState(_state: STATE): void {
+      this.state = _state;
 
+      switch (this.state) {
+        case STATE.HUNT:
+          fc.Time.game.setTimer(1000, 1, this.findPlayer);
+          break;
+        case STATE.CHECK:
+
+          break;
+        case STATE.FLEE:
+          //this.fleeBomb();
+          break;
+      }
+    }
+
+    private findPlayer = (): void => {
 
       let travelVector: fc.Vector3;
       travelVector = avatar.mtxLocal.translation;
@@ -236,7 +266,10 @@ namespace Bomberman {
         this.walkEnemies(WALK.UP);
       }
 
-      fc.Time.game.setTimer(1000, 1, this.findPlayer);
+      if (this.state == STATE.HUNT) {
+        fc.Time.game.setTimer(1000, 1, this.findPlayer);
+      }
+
     }
 
     private detectPlayer(_position: fc.Vector2): boolean {
@@ -247,14 +280,60 @@ namespace Bomberman {
     }
 
     private bombPlayer(): void {
-      console.log("ENTDECKT!");
-
-      if (countBombsEnemy < maxBombEnemy) {
-        levelRoot.appendChild(new Bomb(fc.Vector2.ONE(1), new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y)));
+     if (countBombsEnemy < maxBombEnemy) {
+        levelRoot.appendChild(new Bomb(fc.Vector2.ONE(1), new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y), 1));
         countBombsEnemy++;
+        this.state = STATE.FLEE;
+        this.changeState(STATE.FLEE);
+        fc.Time.game.setTimer(6000, 1, this.setHunt);
       }
-
     }
 
+    private fleeBomb(_direction: string): void {
+     
+      if (_direction == "up") {
+        if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x + 1, enemies.mtxLocal.translation.y)) == false) {
+          this.walkEnemies(WALK.RIGHT);
+        } else if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x - 1, enemies.mtxLocal.translation.y)) == false) {
+          this.walkEnemies(WALK.LEFT);
+        } else {
+          this.walkEnemies(WALK.UP);
+        }
+      }
+
+      if (_direction == "right") {
+        if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x, enemies.mtxLocal.translation.y + 1)) == false) {
+          this.walkEnemies(WALK.UP);
+        } else if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x, enemies.mtxLocal.translation.y - 1)) == false) {
+          this.walkEnemies(WALK.DOWN);
+        } else {
+          this.walkEnemies(WALK.RIGHT);
+        }
+      }
+
+      if (_direction == "down") {
+        if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x + 1, enemies.mtxLocal.translation.y)) == false) {
+          this.walkEnemies(WALK.RIGHT);
+        } else if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x - 1, enemies.mtxLocal.translation.y)) == false) {
+          this.walkEnemies(WALK.LEFT);
+        } else {
+          this.walkEnemies(WALK.DOWN);
+        }
+      }
+
+      if (_direction == "left") {
+        if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x, enemies.mtxLocal.translation.y + 1)) == false) {
+          this.walkEnemies(WALK.UP);
+        } else if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x, enemies.mtxLocal.translation.y - 1)) == false) {
+          this.walkEnemies(WALK.DOWN);
+        } else {
+          this.walkEnemies(WALK.LEFT);
+        }
+      }
+    }
+
+    private setHunt = (): void => {
+      this.changeState(STATE.HUNT);
+    }
   }
 }

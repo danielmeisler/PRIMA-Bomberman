@@ -93,7 +93,7 @@ namespace Bomberman {
     Enemy.generateSprites(coatSprite);
 
     enemies = new Enemy(new fc.Vector2(arenaSize.x - 2, arenaSize.y - 2));
-    //enemies = new Enemy(new fc.Vector2(3, 5));
+    //enemies = new Enemy(new fc.Vector2(1, 7));
 
     return enemies;
   }
