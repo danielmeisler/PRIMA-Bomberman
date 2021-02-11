@@ -29,7 +29,7 @@ namespace Bomberman {
       let date: Date = new Date(ƒ.Time.game.get());
       time.value =
           String(date.getMinutes()).padStart(2, "0") + ":" +
-          String(date.getSeconds()).padStart(2, "0")
+          String(date.getSeconds()).padStart(2, "0");
 
       window.requestAnimationFrame(Hud.loop);
   }

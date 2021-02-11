@@ -981,7 +981,8 @@ var Bomberman;
     class Wall extends Bomberman.GameObject {
         constructor(_size, _position) {
             super("Wall", _size, _position);
-            let txtWall = new fc.TextureImage("Assets/tiles/SolidBlock.png");
+            let txtWall = new fc.TextureImage;
+            txtWall.load("Assets/tiles/SolidBlock.png");
             let mtrWall = new fc.Material("BorderWall", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtWall));
             let cmpMaterial = new fc.ComponentMaterial(mtrWall);
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
