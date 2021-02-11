@@ -1,6 +1,17 @@
 namespace Bomberman {
   import fc = FudgeCore;
 
+  export let countBombs: number = 0;
+  export let countBombsEnemy: number = 0;
+  export let maxBomb: number = 1;
+  export let maxBombEnemy: number = 1;
+  export let circleBomb: boolean = false;
+  export let diagonalBomb: boolean = false;
+
+  export enum WALK {
+    DOWN, UP, RIGHT, LEFT
+  }
+
   export class GameObject extends fc.Node {
     public static readonly meshQuad: fc.MeshQuad = new fc.MeshQuad();
     public rect: fc.Rectangle;

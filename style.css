@@ -7,3 +7,82 @@ canvas {
   width: 100vw;
   height: 100vh;
 }
+div.hud_class {
+  position: absolute;
+}
+div#hud_time {
+  top: 0vh;
+  left: 45vw;
+}
+input[key="time"] {
+  font-family: "Impact", fantasy;
+  appearance: textfield;
+  font-size: 3vw;
+  border: none;
+  color: white;
+  text-align: center;
+  height: 8vh;
+  width: 10vw;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+}
+div#hud_topLeft {
+  top: 0vh;
+  left: 0vw;
+}
+input[key="topLeft"] {
+  font-family: "Impact", fantasy;
+  appearance: textfield;
+  font-size: 3vw;
+  border: none;
+  color: white;
+  text-align: center;
+  height: 8vh;
+  width: 10vw;
+  border-bottom-right-radius: 30px;
+}
+div#hud_topRight {
+  top: 0vh;
+  left: 90vw;
+}
+input[key="topRight"] {
+  font-family: "Impact", fantasy;
+  appearance: textfield;
+  font-size: 3vw;
+  border: none;
+  color: white;
+  text-align: center;
+  height: 8vh;
+  width: 10vw;
+  border-bottom-left-radius: 30px;
+}
+div#hud_bottomLeft {
+  top: 92vh;
+  left: 0vw;
+}
+input[key="bottomLeft"] {
+  font-family: "Impact", fantasy;
+  appearance: textfield;
+  font-size: 3vw;
+  border: none;
+  color: white;
+  text-align: center;
+  height: 8vh;
+  width: 10vw;
+  border-top-right-radius: 30px;
+}
+div#hud_bottomRight {
+  top: 92vh;
+  left: 90vw;
+}
+input[key="bottomRight"] {
+  font-family: "Impact", fantasy;
+  appearance: textfield;
+  font-size: 3vw;
+  border: none;
+  color: white;
+  text-align: center;
+  height: 8vh;
+  width: 10vw;
+  border-top-left-radius: 30px;
+}
