@@ -3,11 +3,7 @@ namespace Bomberman {
   import fc = FudgeCore;
   import fcAid = FudgeAid;
 
-  export enum STATE {
-    HUNT, CHECK, FLEE
-  }
-
-  export class Enemy extends GameObject {
+  export class Enemy3 extends GameObject {
     private static animations: fcAid.SpriteSheetAnimations;
     public state: STATE = STATE.HUNT;
     public job: WALK = WALK.DOWN;
@@ -15,18 +11,18 @@ namespace Bomberman {
     public sprite: fcAid.NodeSprite;
 
     public constructor(_position: fc.Vector2) {
-      super("Enemies", new fc.Vector2(0.8, 0.8), _position);
+      super("Enemies3", new fc.Vector2(0.8, 0.8), _position);
 
       this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
       this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
 
-      this.sprite = new fcAid.NodeSprite("EnemySprite");
+      this.sprite = new fcAid.NodeSprite("EnemySprite3");
       this.sprite.addComponent(new fc.ComponentTransform());
       this.sprite.mtxLocal.translateY(-0.25);
       this.sprite.mtxLocal.translateZ(0.001);
       this.appendChild(this.sprite);
 
-      this.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy.animations["WALK_DOWN"]);
+      this.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy3.animations["WALK_DOWN"]);
       this.sprite.showFrame(0);
       this.sprite.setFrameDirection(1);
       this.sprite.framerate = 6;
@@ -35,12 +31,12 @@ namespace Bomberman {
     }
 
     public static generateSprites(_spritesheet: fc.CoatTextured): void {
-      Enemy.animations = {};
+      Enemy3.animations = {};
       for (let i: number = 0; i < 4; i++) {
         let name: string = "WALK_" + WALK[i];
         let sprite: fcAid.SpriteSheetAnimation = new fcAid.SpriteSheetAnimation(name, _spritesheet);
         sprite.generateByGrid(fc.Rectangle.GET(0, i * 64, 64, 64), 6, 82, fc.ORIGIN2D.BOTTOMCENTER, fc.Vector2.X(64));
-        Enemy.animations[name] = sprite;
+        Enemy3.animations[name] = sprite;
       }
     }
 
@@ -51,42 +47,42 @@ namespace Bomberman {
 
     private checkEnemyCollision(): void {
       for (let wall of wallsNode.getChildren()) {
-        if (enemies.checkCollision(<GameObject>wall)) {
-          enemies.mtxLocal.translation = this.tempPos;
+        if (enemies3.checkCollision(<GameObject>wall)) {
+          enemies3.mtxLocal.translation = this.tempPos;
         }
       }
       for (let wall of explodableBlockNode.getChildren()) {
-        if (enemies.checkCollision(<GameObject>wall)) {
-          enemies.mtxLocal.translation = this.tempPos;
+        if (enemies3.checkCollision(<GameObject>wall)) {
+          enemies3.mtxLocal.translation = this.tempPos;
         }
       }
       for (let bomb of levelRoot.getChildrenByName("Bomb")) {
-        if (enemies.checkCollision(<GameObject>bomb)) {
-          enemies.mtxLocal.translation = this.tempPos;
+        if (enemies3.checkCollision(<GameObject>bomb)) {
+          enemies3.mtxLocal.translation = this.tempPos;
         }
       }
       for (let flames of levelRoot.getChildrenByName("Flames")) {
-        if (enemies.checkCollision(<GameObject>flames)) {
-          enemies.mtxLocal.translation = this.tempPos;
+        if (enemies3.checkCollision(<GameObject>flames)) {
+          enemies3.mtxLocal.translation = this.tempPos;
         }
       }
       for (let avatar of root.getChildrenByName("Bomberman")) {
-        if (enemies.checkCollision(<GameObject>avatar)) {
-          enemies.mtxLocal.translation = this.tempPos;
+        if (enemies3.checkCollision(<GameObject>avatar)) {
+          enemies3.mtxLocal.translation = this.tempPos;
+        }
+      }
+      for (let enemies of root.getChildrenByName("Enemies")) {
+        if (enemies3.checkCollision(<GameObject>enemies)) {
+          enemies3.mtxLocal.translation = this.tempPos;
         }
       }
       for (let enemies2 of root.getChildrenByName("Enemies2")) {
-        if (enemies.checkCollision(<GameObject>enemies2)) {
-          enemies.mtxLocal.translation = this.tempPos;
-        }
-      }
-      for (let enemies3 of root.getChildrenByName("Enemies3")) {
-        if (enemies.checkCollision(<GameObject>enemies3)) {
-          enemies.mtxLocal.translation = this.tempPos;
+        if (enemies3.checkCollision(<GameObject>enemies2)) {
+          enemies3.mtxLocal.translation = this.tempPos;
         }
       }
       for (let portal of levelRoot.getChildrenByName("Portal")) {
-        if (enemies.checkCollision(<GameObject>portal)) {
+        if (enemies3.checkCollision(<GameObject>portal)) {
           let portals: Portal = new Portal(new fc.Vector2(0, 0), -1);
           portals.teleportPortal(<Portal>portal);
         }
@@ -205,24 +201,24 @@ namespace Bomberman {
     private walkEnemies(_job: WALK): void {
       this.job = _job;
 
-      this.tempPos = enemies.mtxLocal.translation;
+      this.tempPos = enemies3.mtxLocal.translation;
 
       switch (this.job) {
         case WALK.UP:
-          enemies.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy.animations["WALK_UP"]);
-          enemies.mtxLocal.translateY(1);
+          enemies3.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy3.animations["WALK_UP"]);
+          enemies3.mtxLocal.translateY(1);
           break;
         case WALK.RIGHT:
-          enemies.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy.animations["WALK_RIGHT"]);
-          enemies.mtxLocal.translateX(1);
+          enemies3.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy3.animations["WALK_RIGHT"]);
+          enemies3.mtxLocal.translateX(1);
           break;
         case WALK.DOWN:
-          enemies.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy.animations["WALK_DOWN"]);
-          enemies.mtxLocal.translateY(-1);
+          enemies3.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy3.animations["WALK_DOWN"]);
+          enemies3.mtxLocal.translateY(-1);
           break;
         case WALK.LEFT:
-          enemies.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy.animations["WALK_LEFT"]);
-          enemies.mtxLocal.translateX(-1);
+          enemies3.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Enemy3.animations["WALK_LEFT"]);
+          enemies3.mtxLocal.translateX(-1);
           break;
       }
 
@@ -246,7 +242,7 @@ namespace Bomberman {
 
           break;
         case STATE.FLEE:
-
+          //this.fleeBomb();
           break;
       }
     }
@@ -284,10 +280,10 @@ namespace Bomberman {
     }
 
     private bombPlayer(): void {
-      if (gameState.topLeft > 0) {
-        if (countBombsEnemy < maxBombEnemy) {
-          levelRoot.appendChild(new Bomb(fc.Vector2.ONE(1), new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y), 1));
-          countBombsEnemy++;
+      if (gameState.bottomRight > 0) {
+        if (countBombsEnemy3 < maxBombEnemy3) {
+          levelRoot.appendChild(new Bomb(fc.Vector2.ONE(1), new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y), 3));
+          countBombsEnemy3++;
           this.state = STATE.FLEE;
           this.changeState(STATE.FLEE);
           fc.Time.game.setTimer(6000, 1, this.setHunt);
@@ -298,9 +294,9 @@ namespace Bomberman {
     private fleeBomb(_direction: string): void {
 
       if (_direction == "up") {
-        if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x + 1, enemies.mtxLocal.translation.y)) == false) {
+        if (this.checkWalls(new fc.Vector2(enemies3.mtxLocal.translation.x + 1, enemies3.mtxLocal.translation.y)) == false) {
           this.walkEnemies(WALK.RIGHT);
-        } else if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x - 1, enemies.mtxLocal.translation.y)) == false) {
+        } else if (this.checkWalls(new fc.Vector2(enemies3.mtxLocal.translation.x - 1, enemies3.mtxLocal.translation.y)) == false) {
           this.walkEnemies(WALK.LEFT);
         } else {
           this.walkEnemies(WALK.UP);
@@ -308,9 +304,9 @@ namespace Bomberman {
       }
 
       if (_direction == "right") {
-        if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x, enemies.mtxLocal.translation.y + 1)) == false) {
+        if (this.checkWalls(new fc.Vector2(enemies3.mtxLocal.translation.x, enemies3.mtxLocal.translation.y + 1)) == false) {
           this.walkEnemies(WALK.UP);
-        } else if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x, enemies.mtxLocal.translation.y - 1)) == false) {
+        } else if (this.checkWalls(new fc.Vector2(enemies3.mtxLocal.translation.x, enemies3.mtxLocal.translation.y - 1)) == false) {
           this.walkEnemies(WALK.DOWN);
         } else {
           this.walkEnemies(WALK.RIGHT);
@@ -318,9 +314,9 @@ namespace Bomberman {
       }
 
       if (_direction == "down") {
-        if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x + 1, enemies.mtxLocal.translation.y)) == false) {
+        if (this.checkWalls(new fc.Vector2(enemies3.mtxLocal.translation.x + 1, enemies3.mtxLocal.translation.y)) == false) {
           this.walkEnemies(WALK.RIGHT);
-        } else if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x - 1, enemies.mtxLocal.translation.y)) == false) {
+        } else if (this.checkWalls(new fc.Vector2(enemies3.mtxLocal.translation.x - 1, enemies3.mtxLocal.translation.y)) == false) {
           this.walkEnemies(WALK.LEFT);
         } else {
           this.walkEnemies(WALK.DOWN);
@@ -328,9 +324,9 @@ namespace Bomberman {
       }
 
       if (_direction == "left") {
-        if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x, enemies.mtxLocal.translation.y + 1)) == false) {
+        if (this.checkWalls(new fc.Vector2(enemies3.mtxLocal.translation.x, enemies3.mtxLocal.translation.y + 1)) == false) {
           this.walkEnemies(WALK.UP);
-        } else if (this.checkWalls(new fc.Vector2(enemies.mtxLocal.translation.x, enemies.mtxLocal.translation.y - 1)) == false) {
+        } else if (this.checkWalls(new fc.Vector2(enemies3.mtxLocal.translation.x, enemies3.mtxLocal.translation.y - 1)) == false) {
           this.walkEnemies(WALK.DOWN);
         } else {
           this.walkEnemies(WALK.LEFT);
@@ -343,9 +339,9 @@ namespace Bomberman {
     }
 
     private checkEnemyDeath(): void {
-      if (gameState.topLeft <= 0) {
-        root.removeChild(enemies);
-        enemies.removeAllChildren();
+      if (gameState.bottomRight == 0) {
+        root.removeChild(enemies3);
+        enemies3.removeAllChildren();
       }
     }
   }

@@ -80,6 +80,9 @@ namespace Bomberman {
       switch (this.job) {
         case ITEM.BOMB_PLUS:
             maxBomb++;
+            maxBombEnemy++;
+            maxBombEnemy2++;
+            maxBombEnemy3++;
             break;
         case ITEM.FLAME_PLUS:
             flameDistance++;
@@ -91,7 +94,7 @@ namespace Bomberman {
             diagonalBomb = true;
             break;
         case ITEM.LIFE_INVINCIBILITY:
-            console.log("UNSTERBLICH");
+            lifeInvincibility = true;
             break;
         case ITEM.LIFE_PLUS:
             

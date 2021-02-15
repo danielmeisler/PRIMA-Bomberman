@@ -7,7 +7,7 @@ namespace Bomberman {
     public topRight: number = 3;
     public bottomLeft: number = 3;
     public bottomRight: number = 3;
-    //public time: String = "00:00";
+    public controls: string = "WASD  :  Moving      SPACE  :  Bomb";
     protected reduceMutator(_mutator: fc.Mutator): void {/* */ }
   }
 

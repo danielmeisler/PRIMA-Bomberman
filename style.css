@@ -26,6 +26,22 @@ input[key="time"] {
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
 }
+div#hud_controls {
+  top: 92vh;
+  left: 35vw;
+}
+input[key="controls"] {
+  font-family: "Impact", fantasy;
+  appearance: textfield;
+  font-size: 2vw;
+  border: none;
+  color: white;
+  text-align: center;
+  height: 8vh;
+  width: 30vw;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+}
 div#hud_topLeft {
   top: 0vh;
   left: 0vw;
@@ -85,4 +101,34 @@ input[key="bottomRight"] {
   height: 8vh;
   width: 10vw;
   border-top-left-radius: 30px;
+}
+div#gameOverDIV {
+  position: absolute;
+  background-color: brown;
+  top: 0vh;
+  left: 0vw;
+}
+#gameOverContent {
+  color: white;
+  height: 100vh;
+  width: 100vw;
+}
+#gameOverTextID {
+  font-family: "Impact", fantasy;
+  font-size: 20vh;
+  text-align: center;
+}
+#gameOverButtonID {
+  font-family: "Impact", fantasy;
+  color: white;
+  background-color: brown;
+  border: none;
+  text-align: center;
+  font-size: 10vh;
+  margin-left: 42vw;
+  transition-duration: 0.4s;
+}
+#gameOverButtonID:hover {
+  background-color: WHITE;
+  color: brown;
 }

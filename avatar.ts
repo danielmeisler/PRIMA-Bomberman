@@ -18,8 +18,8 @@ namespace Bomberman {
     public constructor(_position: fc.Vector2) {
       super("Bomberman", new fc.Vector2(0.8, 0.8), _position);
 
- /*   let cMaterial: fc.ComponentMaterial = new fc.ComponentMaterial(Avatar.mtrColorAvatar);
-      this.addComponent(cMaterial);*/
+      /*   let cMaterial: fc.ComponentMaterial = new fc.ComponentMaterial(Avatar.mtrColorAvatar);
+           this.addComponent(cMaterial);*/
 
       this.sprite = new fcAid.NodeSprite("AvatarSprite");
       this.sprite.addComponent(new fc.ComponentTransform());
@@ -69,9 +69,11 @@ namespace Bomberman {
         avatar.mtxLocal.translateY(-1);
       }
       else if (event.code == fc.KEYBOARD_CODE.SPACE) {
-        if (countBombs < maxBomb) {
-          levelRoot.appendChild(new Bomb(fc.Vector2.ONE(1), new fc.Vector2(avatar.mtxLocal.translation.x, avatar.mtxLocal.translation.y), 0));
-          countBombs++;
+        if (gameState.bottomLeft > 0) {
+          if (countBombs < maxBomb) {
+            levelRoot.appendChild(new Bomb(fc.Vector2.ONE(1), new fc.Vector2(avatar.mtxLocal.translation.x, avatar.mtxLocal.translation.y), 0));
+            countBombs++;
+          }
         }
       }
 
@@ -95,11 +97,28 @@ namespace Bomberman {
       }
       for (let flames of levelRoot.getChildrenByName("Flames")) {
         if (avatar.checkCollision(<GameObject>flames)) {
-          console.log("MINUS LEBEN");
-          gameState.bottomLeft--;
+          console.log(lifeLimiter);
+          if (lifeLimiter == false) {
+            if (lifeInvincibility == false) {
+              gameState.bottomLeft--;
+              hndDeaths();
+              lifeLimiter = true;
+              fc.Time.game.setTimer(3000, 1, avatar.setLifeLimiter);
+            }
+          }
         }
       }
       for (let enemies of root.getChildrenByName("Enemies")) {
+        if (avatar.checkCollision(<GameObject>enemies)) {
+          avatar.mtxLocal.translation = this.tempPos;
+        }
+      }
+      for (let enemies of root.getChildrenByName("Enemies2")) {
+        if (avatar.checkCollision(<GameObject>enemies)) {
+          avatar.mtxLocal.translation = this.tempPos;
+        }
+      }
+      for (let enemies of root.getChildrenByName("Enemies3")) {
         if (avatar.checkCollision(<GameObject>enemies)) {
           avatar.mtxLocal.translation = this.tempPos;
         }
@@ -154,6 +173,7 @@ namespace Bomberman {
           item.itemChanger();
           cmpAudio.play(true);
           levelRoot.removeChild(items);
+          avatar.setShield();
         }
       }
       for (let items of levelRoot.getChildrenByName("LIFE_PLUS")) {
@@ -163,10 +183,27 @@ namespace Bomberman {
           levelRoot.removeChild(items);
         }
       }
-      
+
     }
 
+    public checkPlayerDeath(): void {
+      if (gameState.bottomLeft <= 0) {
+        root.removeChild(avatar);
+      }
+    }
 
+    private setShield(): void {
+      (<HTMLDivElement>document.getElementById("hud_bottomLeftInput")).style.color = "BLACK";
+      fc.Time.game.setTimer(10000, 1, avatar.setInvinciblity);
+    }
 
+    private setInvinciblity = (): void => {
+      (<HTMLDivElement>document.getElementById("hud_bottomLeftInput")).style.color = "WHITE";
+      lifeInvincibility = false;
+    }
+
+    private setLifeLimiter = (): void => {
+      lifeLimiter = false;
+    }
   }
 }

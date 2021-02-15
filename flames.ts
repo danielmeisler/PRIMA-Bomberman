@@ -125,17 +125,37 @@ namespace Bomberman {
       for (let flames of levelRoot.getChildrenByName("Flames")) {
         fc.Time.game.setTimer(3000, 1, this.removeFlames.bind(flames));
         if (avatar.checkCollision(<GameObject>flames)) {
-          cmpAudio.play(true);
-          console.log("MINUS LEBEN" + avatar.mtxLocal.translation);
-          gameState.bottomLeft--;
+          if (lifeLimiter == false) {
+            if (lifeInvincibility == false) {
+              gameState.bottomLeft--;
+              hndDeaths();
+              lifeLimiter = true;
+              fc.Time.game.setTimer(3000, 1, this.setLifeLimiter);
+            }
+          }
         }
       }
-/*       for (let flames of levelRoot.getChildrenByName("Flames")) {
+      for (let flames of levelRoot.getChildrenByName("Flames")) {
         if (enemies.checkCollision(<GameObject>flames)) {
-          console.log("MINUS LEBEN FÜR BÖSE MANN");
-          gameState.topRight--;
+          if (gameState.topLeft > 0) 
+          gameState.topLeft--;
+          hndDeaths();
         }
-      } */
+      } 
+      for (let flames of levelRoot.getChildrenByName("Flames")) {
+        if (enemies2.checkCollision(<GameObject>flames)) {
+          if (gameState.topRight > 0)
+          gameState.topRight--;
+          hndDeaths();
+        }
+      } 
+      for (let flames of levelRoot.getChildrenByName("Flames")) {
+        if (enemies3.checkCollision(<GameObject>flames)) {
+          if (gameState.bottomRight > 0)
+          gameState.bottomRight--;
+          hndDeaths();
+        }
+      } 
     }
 
     private checkFlameCollision(_position: fc.Vector2): boolean {
@@ -159,7 +179,10 @@ namespace Bomberman {
       }
       return false;
     }
-
+    
+    private setLifeLimiter = (): void => {
+      lifeLimiter = false;
+    }
 
     private removeFlames(): void {
       levelRoot.removeChild(this);

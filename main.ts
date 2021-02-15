@@ -8,6 +8,8 @@ namespace Bomberman {
 
   let cmpAudio: fc.ComponentAudio;
   let backgroundTheme: fc.Audio = new fc.Audio("Assets/sounds/theme.mp3");
+  let soundDeath: fc.Audio = new fc.Audio("Assets/sounds/death.wav");
+  let soundVictory: fc.Audio = new fc.Audio("Assets/sounds/victory.wav");
 
   export let root: fc.Node = new fc.Node("Root");
   export let levelRoot: fc.Node = new fc.Node("LevelNode");
@@ -17,6 +19,8 @@ namespace Bomberman {
 
   export let avatar: Avatar;
   export let enemies: Enemy;
+  export let enemies2: Enemy2;
+  export let enemies3: Enemy3;
 
   export let arenaSize: fc.Vector2 = new fc.Vector2(21, 9);
 
@@ -39,6 +43,12 @@ namespace Bomberman {
 
     enemies = await hndEnemies();
     root.appendChild(enemies);
+
+    enemies2 = await hndEnemies2();
+    root.appendChild(enemies2);
+
+    enemies3 = await hndEnemies3();
+    root.appendChild(enemies3);
 
     await hndBomb();
     await hndFlames();
@@ -66,7 +76,10 @@ namespace Bomberman {
   }
 
   function hndLoop(_event: Event): void {
+    avatar.checkPlayerDeath();
     enemies.update();
+    enemies2.update();
+    enemies3.update();
     viewport.draw();
   }
 
@@ -92,10 +105,31 @@ namespace Bomberman {
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtEnemy);
     Enemy.generateSprites(coatSprite);
 
-    enemies = new Enemy(new fc.Vector2(arenaSize.x - 2, arenaSize.y - 2));
-    //enemies = new Enemy(new fc.Vector2(1, 7));
+    enemies = new Enemy(new fc.Vector2(1, arenaSize.y - 2));
 
     return enemies;
+  }
+
+  async function hndEnemies2(): Promise<Enemy2> {
+    let txtEnemy: fc.TextureImage = new fc.TextureImage();
+    txtEnemy.load("Assets/enemies/enemy_sprites.png");
+    let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtEnemy);
+    Enemy2.generateSprites(coatSprite);
+
+    enemies2 = new Enemy2(new fc.Vector2(arenaSize.x - 2, arenaSize.y - 2));
+
+    return enemies2;
+  }
+
+  async function hndEnemies3(): Promise<Enemy3> {
+    let txtEnemy: fc.TextureImage = new fc.TextureImage();
+    txtEnemy.load("Assets/enemies/enemy_sprites.png");
+    let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtEnemy);
+    Enemy3.generateSprites(coatSprite);
+
+    enemies3 = new Enemy3(new fc.Vector2(arenaSize.x - 2, 1));
+
+    return enemies3;
   }
 
   async function hndBomb(): Promise<void> {
@@ -127,6 +161,68 @@ namespace Bomberman {
     txtItems.load("Assets/items/items_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtItems);
     Items.generateSprites(coatSprite);
+  }
+
+  export function hndDeaths(): void {
+    if (gameState.bottomLeft <= 0) {
+
+      cmpAudio.play(false);
+      cmpAudio = new fc.ComponentAudio(soundDeath, false, false);
+      cmpAudio.connect(true);
+      cmpAudio.volume = 0.05;
+      cmpAudio.setAudio(soundDeath);
+      cmpAudio.play(true);
+
+
+      let gameOver: HTMLDivElement = document.createElement("div");
+      gameOver.id = "gameOverContent";
+
+      let gameOverText: HTMLParagraphElement = document.createElement("p");
+      gameOverText.id = "gameOverTextID";
+      gameOverText.innerHTML = "GAME OVER";
+      gameOver.appendChild(gameOverText);
+
+      let gameOverButton: HTMLButtonElement = document.createElement("button");
+      gameOverButton.id = "gameOverButtonID";
+      gameOverButton.innerHTML = "RESTART";
+      gameOver.appendChild(gameOverButton);
+
+      gameOverButton.addEventListener("click", hndRestart);
+
+      (<HTMLDivElement>document.getElementById("gameOverDIV")).appendChild(gameOver);
+    }
+
+    if (gameState.topLeft <= 0 && gameState.topRight <= 0 && gameState.bottomRight <= 0) {
+      
+      cmpAudio.play(false);
+      cmpAudio = new fc.ComponentAudio(soundVictory, false, false);
+      cmpAudio.connect(true);
+      cmpAudio.volume = 0.05;
+      cmpAudio.setAudio(soundVictory);
+      cmpAudio.play(true);
+
+      let gameOver: HTMLDivElement = document.createElement("div");
+      gameOver.id = "gameOverContent";
+
+      let gameOverText: HTMLParagraphElement = document.createElement("p");
+      gameOverText.id = "gameOverTextID";
+      gameOverText.innerHTML = "YOU WON";
+      gameOver.appendChild(gameOverText);
+
+      let gameOverButton: HTMLButtonElement = document.createElement("button");
+      gameOverButton.id = "gameOverButtonID";
+      gameOverButton.innerHTML = "RESTART";
+      gameOver.appendChild(gameOverButton);
+
+      gameOverButton.addEventListener("click", hndRestart);
+
+      (<HTMLDivElement>document.getElementById("gameOverDIV")).appendChild(gameOver);
+    }
+
+  }
+
+  function hndRestart(_event: Event): void {
+    location.reload();
   }
 
 }

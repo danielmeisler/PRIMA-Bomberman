@@ -4,10 +4,16 @@ var Bomberman;
     var fc = FudgeCore;
     Bomberman.countBombs = 0;
     Bomberman.countBombsEnemy = 0;
+    Bomberman.countBombsEnemy2 = 0;
+    Bomberman.countBombsEnemy3 = 0;
     Bomberman.maxBomb = 1;
     Bomberman.maxBombEnemy = 1;
+    Bomberman.maxBombEnemy2 = 1;
+    Bomberman.maxBombEnemy3 = 1;
     Bomberman.circleBomb = false;
     Bomberman.diagonalBomb = false;
+    Bomberman.lifeInvincibility = false;
+    Bomberman.lifeLimiter = false;
     let WALK;
     (function (WALK) {
         WALK[WALK["DOWN"] = 0] = "DOWN";
@@ -48,6 +54,13 @@ var Bomberman;
         constructor(_position) {
             super("Bomberman", new fc.Vector2(0.8, 0.8), _position);
             this.job = Bomberman.WALK.DOWN;
+            this.setInvinciblity = () => {
+                document.getElementById("hud_bottomLeftInput").style.color = "WHITE";
+                Bomberman.lifeInvincibility = false;
+            };
+            this.setLifeLimiter = () => {
+                Bomberman.lifeLimiter = false;
+            };
             /*   let cMaterial: fc.ComponentMaterial = new fc.ComponentMaterial(Avatar.mtrColorAvatar);
                  this.addComponent(cMaterial);*/
             this.sprite = new fcAid.NodeSprite("AvatarSprite");
@@ -94,9 +107,11 @@ var Bomberman;
                 Bomberman.avatar.mtxLocal.translateY(-1);
             }
             else if (event.code == fc.KEYBOARD_CODE.SPACE) {
-                if (Bomberman.countBombs < Bomberman.maxBomb) {
-                    Bomberman.levelRoot.appendChild(new Bomberman.Bomb(fc.Vector2.ONE(1), new fc.Vector2(Bomberman.avatar.mtxLocal.translation.x, Bomberman.avatar.mtxLocal.translation.y), 0));
-                    Bomberman.countBombs++;
+                if (Bomberman.gameState.bottomLeft > 0) {
+                    if (Bomberman.countBombs < Bomberman.maxBomb) {
+                        Bomberman.levelRoot.appendChild(new Bomberman.Bomb(fc.Vector2.ONE(1), new fc.Vector2(Bomberman.avatar.mtxLocal.translation.x, Bomberman.avatar.mtxLocal.translation.y), 0));
+                        Bomberman.countBombs++;
+                    }
                 }
             }
             Bomberman.avatar.rect.position.x = Bomberman.avatar.mtxLocal.translation.x - Bomberman.avatar.rect.size.x / 2;
@@ -118,11 +133,28 @@ var Bomberman;
             }
             for (let flames of Bomberman.levelRoot.getChildrenByName("Flames")) {
                 if (Bomberman.avatar.checkCollision(flames)) {
-                    console.log("MINUS LEBEN");
-                    Bomberman.gameState.bottomLeft--;
+                    console.log(Bomberman.lifeLimiter);
+                    if (Bomberman.lifeLimiter == false) {
+                        if (Bomberman.lifeInvincibility == false) {
+                            Bomberman.gameState.bottomLeft--;
+                            Bomberman.hndDeaths();
+                            Bomberman.lifeLimiter = true;
+                            fc.Time.game.setTimer(3000, 1, Bomberman.avatar.setLifeLimiter);
+                        }
+                    }
                 }
             }
             for (let enemies of Bomberman.root.getChildrenByName("Enemies")) {
+                if (Bomberman.avatar.checkCollision(enemies)) {
+                    Bomberman.avatar.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let enemies of Bomberman.root.getChildrenByName("Enemies2")) {
+                if (Bomberman.avatar.checkCollision(enemies)) {
+                    Bomberman.avatar.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let enemies of Bomberman.root.getChildrenByName("Enemies3")) {
                 if (Bomberman.avatar.checkCollision(enemies)) {
                     Bomberman.avatar.mtxLocal.translation = this.tempPos;
                 }
@@ -175,6 +207,7 @@ var Bomberman;
                     item.itemChanger();
                     cmpAudio.play(true);
                     Bomberman.levelRoot.removeChild(items);
+                    Bomberman.avatar.setShield();
                 }
             }
             for (let items of Bomberman.levelRoot.getChildrenByName("LIFE_PLUS")) {
@@ -184,6 +217,15 @@ var Bomberman;
                     Bomberman.levelRoot.removeChild(items);
                 }
             }
+        }
+        checkPlayerDeath() {
+            if (Bomberman.gameState.bottomLeft <= 0) {
+                Bomberman.root.removeChild(Bomberman.avatar);
+            }
+        }
+        setShield() {
+            document.getElementById("hud_bottomLeftInput").style.color = "BLACK";
+            fc.Time.game.setTimer(10000, 1, Bomberman.avatar.setInvinciblity);
         }
     }
     Bomberman.Avatar = Avatar;
@@ -239,6 +281,46 @@ var Bomberman;
                 Bomberman.levelRoot.removeChild(this);
                 Bomberman.countBombsEnemy--;
             };
+            this.explodeBombEnemy2 = () => {
+                cmpAudio = new fc.ComponentAudio(soundBomb, false, false);
+                cmpAudio.connect(true);
+                cmpAudio.volume = 0.05;
+                cmpAudio.setAudio(soundBomb);
+                cmpAudio.play(true);
+                this.sprite.setAnimation(Bomb.animations["EXPLODE"]);
+                let flames = new Bomberman.Flames(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y));
+                if (Bomberman.circleBomb == true)
+                    flames.circleBombFlames(flames.mtxLocal.translation);
+                else if (Bomberman.diagonalBomb == true)
+                    flames.diagonalBombFlames(flames.mtxLocal.translation);
+                else
+                    flames.placeFlames(flames.mtxLocal.translation);
+                fc.Time.game.setTimer(1000, 1, this.removeBombEnemy2);
+            };
+            this.removeBombEnemy2 = () => {
+                Bomberman.levelRoot.removeChild(this);
+                Bomberman.countBombsEnemy2--;
+            };
+            this.explodeBombEnemy3 = () => {
+                cmpAudio = new fc.ComponentAudio(soundBomb, false, false);
+                cmpAudio.connect(true);
+                cmpAudio.volume = 0.05;
+                cmpAudio.setAudio(soundBomb);
+                cmpAudio.play(true);
+                this.sprite.setAnimation(Bomb.animations["EXPLODE"]);
+                let flames = new Bomberman.Flames(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y));
+                if (Bomberman.circleBomb == true)
+                    flames.circleBombFlames(flames.mtxLocal.translation);
+                else if (Bomberman.diagonalBomb == true)
+                    flames.diagonalBombFlames(flames.mtxLocal.translation);
+                else
+                    flames.placeFlames(flames.mtxLocal.translation);
+                fc.Time.game.setTimer(1000, 1, this.removeBombEnemy3);
+            };
+            this.removeBombEnemy3 = () => {
+                Bomberman.levelRoot.removeChild(this);
+                Bomberman.countBombsEnemy3--;
+            };
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
             this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
             this.sprite = new fcAid.NodeSprite("BombSprite");
@@ -253,6 +335,10 @@ var Bomberman;
                 fc.Time.game.setTimer(3000, 1, this.explodeBomb);
             if (_source == 1)
                 fc.Time.game.setTimer(3000, 1, this.explodeBombEnemy);
+            if (_source == 2)
+                fc.Time.game.setTimer(3000, 1, this.explodeBombEnemy2);
+            if (_source == 3)
+                fc.Time.game.setTimer(3000, 1, this.explodeBombEnemy3);
         }
         static generateSprites(_spritesheet, _spritesheet2) {
             Bomb.animations = {};
@@ -268,7 +354,9 @@ var Bomberman;
     }
     Bomberman.Bomb = Bomb;
 })(Bomberman || (Bomberman = {}));
+///<reference path= "GameObject.ts"/>
 var Bomberman;
+///<reference path= "GameObject.ts"/>
 (function (Bomberman) {
     var fc = FudgeCore;
     var fcAid = FudgeAid;
@@ -318,7 +406,6 @@ var Bomberman;
             this.sprite.setFrameDirection(1);
             this.sprite.framerate = 6;
             this.changeState(this.state);
-            //fc.Time.game.setTimer(1000, 1, this.findPlayer);
         }
         static generateSprites(_spritesheet) {
             Enemy.animations = {};
@@ -331,6 +418,7 @@ var Bomberman;
         }
         update() {
             this.checkEnemyDanger();
+            this.checkEnemyDeath();
         }
         checkEnemyCollision() {
             for (let wall of Bomberman.wallsNode.getChildren()) {
@@ -355,6 +443,16 @@ var Bomberman;
             }
             for (let avatar of Bomberman.root.getChildrenByName("Bomberman")) {
                 if (Bomberman.enemies.checkCollision(avatar)) {
+                    Bomberman.enemies.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let enemies2 of Bomberman.root.getChildrenByName("Enemies2")) {
+                if (Bomberman.enemies.checkCollision(enemies2)) {
+                    Bomberman.enemies.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let enemies3 of Bomberman.root.getChildrenByName("Enemies3")) {
+                if (Bomberman.enemies.checkCollision(enemies3)) {
                     Bomberman.enemies.mtxLocal.translation = this.tempPos;
                 }
             }
@@ -453,11 +551,6 @@ var Bomberman;
                     return true;
                 }
             }
-            /*       for (let bomb of levelRoot.getChildrenByName("Flames")) {
-                    if (_position.equals(bomb.mtxLocal.translation.toVector2())) {
-                      return true;
-                    }
-                  } */
             return false;
         }
         walkEnemies(_job) {
@@ -496,7 +589,6 @@ var Bomberman;
                 case STATE.CHECK:
                     break;
                 case STATE.FLEE:
-                    //this.fleeBomb();
                     break;
             }
         }
@@ -507,12 +599,14 @@ var Bomberman;
             return false;
         }
         bombPlayer() {
-            if (Bomberman.countBombsEnemy < Bomberman.maxBombEnemy) {
-                Bomberman.levelRoot.appendChild(new Bomberman.Bomb(fc.Vector2.ONE(1), new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y), 1));
-                Bomberman.countBombsEnemy++;
-                this.state = STATE.FLEE;
-                this.changeState(STATE.FLEE);
-                fc.Time.game.setTimer(6000, 1, this.setHunt);
+            if (Bomberman.gameState.topLeft > 0) {
+                if (Bomberman.countBombsEnemy < Bomberman.maxBombEnemy) {
+                    Bomberman.levelRoot.appendChild(new Bomberman.Bomb(fc.Vector2.ONE(1), new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y), 1));
+                    Bomberman.countBombsEnemy++;
+                    this.state = STATE.FLEE;
+                    this.changeState(STATE.FLEE);
+                    fc.Time.game.setTimer(6000, 1, this.setHunt);
+                }
             }
         }
         fleeBomb(_direction) {
@@ -561,8 +655,624 @@ var Bomberman;
                 }
             }
         }
+        checkEnemyDeath() {
+            if (Bomberman.gameState.topLeft <= 0) {
+                Bomberman.root.removeChild(Bomberman.enemies);
+                Bomberman.enemies.removeAllChildren();
+            }
+        }
     }
     Bomberman.Enemy = Enemy;
+})(Bomberman || (Bomberman = {}));
+///<reference path= "GameObject.ts"/>
+var Bomberman;
+///<reference path= "GameObject.ts"/>
+(function (Bomberman) {
+    var fc = FudgeCore;
+    var fcAid = FudgeAid;
+    class Enemy2 extends Bomberman.GameObject {
+        constructor(_position) {
+            super("Enemies2", new fc.Vector2(0.8, 0.8), _position);
+            this.state = Bomberman.STATE.HUNT;
+            this.job = Bomberman.WALK.DOWN;
+            this.findPlayer = () => {
+                let travelVector;
+                travelVector = Bomberman.avatar.mtxLocal.translation;
+                travelVector.subtract(this.mtxLocal.translation);
+                if (travelVector.x < 0) {
+                    this.walkEnemies(Bomberman.WALK.LEFT);
+                }
+                if (travelVector.x > 0) {
+                    this.walkEnemies(Bomberman.WALK.RIGHT);
+                }
+                if (travelVector.y < 0) {
+                    this.walkEnemies(Bomberman.WALK.DOWN);
+                }
+                if (travelVector.y > 0) {
+                    this.walkEnemies(Bomberman.WALK.UP);
+                }
+                if (this.state == Bomberman.STATE.HUNT) {
+                    fc.Time.game.setTimer(1000, 1, this.findPlayer);
+                }
+            };
+            this.setHunt = () => {
+                this.changeState(Bomberman.STATE.HUNT);
+            };
+            this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
+            this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
+            this.sprite = new fcAid.NodeSprite("EnemySprite2");
+            this.sprite.addComponent(new fc.ComponentTransform());
+            this.sprite.mtxLocal.translateY(-0.25);
+            this.sprite.mtxLocal.translateZ(0.001);
+            this.appendChild(this.sprite);
+            this.sprite.setAnimation(Enemy2.animations["WALK_DOWN"]);
+            this.sprite.showFrame(0);
+            this.sprite.setFrameDirection(1);
+            this.sprite.framerate = 6;
+            this.changeState(this.state);
+        }
+        static generateSprites(_spritesheet) {
+            Enemy2.animations = {};
+            for (let i = 0; i < 4; i++) {
+                let name = "WALK_" + Bomberman.WALK[i];
+                let sprite = new fcAid.SpriteSheetAnimation(name, _spritesheet);
+                sprite.generateByGrid(fc.Rectangle.GET(0, i * 64, 64, 64), 6, 82, fc.ORIGIN2D.BOTTOMCENTER, fc.Vector2.X(64));
+                Enemy2.animations[name] = sprite;
+            }
+        }
+        update() {
+            this.checkEnemyDanger();
+            this.checkEnemyDeath();
+        }
+        checkEnemyCollision() {
+            for (let wall of Bomberman.wallsNode.getChildren()) {
+                if (Bomberman.enemies2.checkCollision(wall)) {
+                    Bomberman.enemies2.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let wall of Bomberman.explodableBlockNode.getChildren()) {
+                if (Bomberman.enemies2.checkCollision(wall)) {
+                    Bomberman.enemies2.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let bomb of Bomberman.levelRoot.getChildrenByName("Bomb")) {
+                if (Bomberman.enemies2.checkCollision(bomb)) {
+                    Bomberman.enemies2.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let flames of Bomberman.levelRoot.getChildrenByName("Flames")) {
+                if (Bomberman.enemies2.checkCollision(flames)) {
+                    Bomberman.enemies2.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let avatar of Bomberman.root.getChildrenByName("Bomberman")) {
+                if (Bomberman.enemies2.checkCollision(avatar)) {
+                    Bomberman.enemies2.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let enemies of Bomberman.root.getChildrenByName("Enemies")) {
+                if (Bomberman.enemies2.checkCollision(enemies)) {
+                    Bomberman.enemies2.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let enemies3 of Bomberman.root.getChildrenByName("Enemies3")) {
+                if (Bomberman.enemies2.checkCollision(enemies3)) {
+                    Bomberman.enemies2.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let portal of Bomberman.levelRoot.getChildrenByName("Portal")) {
+                if (Bomberman.enemies2.checkCollision(portal)) {
+                    let portals = new Bomberman.Portal(new fc.Vector2(0, 0), -1);
+                    portals.teleportPortal(portal);
+                }
+            }
+        }
+        checkEnemyDanger() {
+            let _position = this.mtxLocal.translation;
+            let positionX;
+            let positionY;
+            for (let bomb of Bomberman.levelRoot.getChildrenByName("Bomb")) {
+                if (this.mtxLocal.translation.toVector2().equals(bomb.mtxLocal.translation.toVector2())) {
+                    if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x + 1, this.mtxLocal.translation.y)) == false) {
+                        this.walkEnemies(Bomberman.WALK.RIGHT);
+                    }
+                    else if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y - 1)) == false) {
+                        this.walkEnemies(Bomberman.WALK.DOWN);
+                    }
+                    else if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x - 1, this.mtxLocal.translation.y)) == false) {
+                        this.walkEnemies(Bomberman.WALK.LEFT);
+                    }
+                    else if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y + 1)) == false) {
+                        this.walkEnemies(Bomberman.WALK.UP);
+                    }
+                }
+            }
+            for (let i = 1; i <= Bomberman.flameDistance; i++) {
+                positionX = new fc.Vector2(_position.x + i, _position.y);
+                if (this.checkWalls(positionX) == true) {
+                    break;
+                }
+                if (this.checkBombs(positionX) == true) {
+                    this.fleeBomb("left");
+                }
+                if (this.detectPlayer(positionX) == true) {
+                    this.bombPlayer();
+                }
+            }
+            for (let i = 1; i <= Bomberman.flameDistance; i++) {
+                positionY = new fc.Vector2(_position.x, _position.y + i);
+                if (this.checkWalls(positionY) == true) {
+                    break;
+                }
+                if (this.checkBombs(positionY) == true) {
+                    this.fleeBomb("down");
+                }
+                if (this.detectPlayer(positionY) == true) {
+                    this.bombPlayer();
+                }
+            }
+            for (let i = -1; i >= -Bomberman.flameDistance; i--) {
+                positionX = new fc.Vector2(_position.x + i, _position.y);
+                if (this.checkWalls(positionX) == true) {
+                    break;
+                }
+                if (this.checkBombs(positionX) == true) {
+                    this.fleeBomb("right");
+                }
+                if (this.detectPlayer(positionX) == true) {
+                    this.bombPlayer();
+                }
+            }
+            for (let i = -1; i >= -Bomberman.flameDistance; i--) {
+                positionY = new fc.Vector2(_position.x, _position.y + i);
+                if (this.checkWalls(positionY) == true) {
+                    break;
+                }
+                if (this.checkBombs(positionY) == true) {
+                    this.fleeBomb("up");
+                }
+                if (this.detectPlayer(positionY) == true) {
+                    this.bombPlayer();
+                }
+            }
+        }
+        checkWalls(_position) {
+            for (let wall of Bomberman.wallsNode.getChildren()) {
+                if (_position.equals(wall.mtxLocal.translation.toVector2())) {
+                    return true;
+                }
+            }
+            for (let explodableBlock of Bomberman.explodableBlockNode.getChildren()) {
+                if (_position.equals(explodableBlock.mtxLocal.translation.toVector2())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        checkBombs(_position) {
+            for (let bomb of Bomberman.levelRoot.getChildrenByName("Bomb")) {
+                if (_position.equals(bomb.mtxLocal.translation.toVector2())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        walkEnemies(_job) {
+            this.job = _job;
+            this.tempPos = Bomberman.enemies2.mtxLocal.translation;
+            switch (this.job) {
+                case Bomberman.WALK.UP:
+                    Bomberman.enemies2.sprite.setAnimation(Enemy2.animations["WALK_UP"]);
+                    Bomberman.enemies2.mtxLocal.translateY(1);
+                    break;
+                case Bomberman.WALK.RIGHT:
+                    Bomberman.enemies2.sprite.setAnimation(Enemy2.animations["WALK_RIGHT"]);
+                    Bomberman.enemies2.mtxLocal.translateX(1);
+                    break;
+                case Bomberman.WALK.DOWN:
+                    Bomberman.enemies2.sprite.setAnimation(Enemy2.animations["WALK_DOWN"]);
+                    Bomberman.enemies2.mtxLocal.translateY(-1);
+                    break;
+                case Bomberman.WALK.LEFT:
+                    Bomberman.enemies2.sprite.setAnimation(Enemy2.animations["WALK_LEFT"]);
+                    Bomberman.enemies2.mtxLocal.translateX(-1);
+                    break;
+            }
+            this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
+            this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
+            this.checkEnemyCollision();
+            this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
+            this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
+        }
+        changeState(_state) {
+            this.state = _state;
+            switch (this.state) {
+                case Bomberman.STATE.HUNT:
+                    fc.Time.game.setTimer(1000, 1, this.findPlayer);
+                    break;
+                case Bomberman.STATE.CHECK:
+                    break;
+                case Bomberman.STATE.FLEE:
+                    //this.fleeBomb();
+                    break;
+            }
+        }
+        detectPlayer(_position) {
+            if (_position.equals(Bomberman.avatar.mtxLocal.translation.toVector2())) {
+                return true;
+            }
+            return false;
+        }
+        bombPlayer() {
+            if (Bomberman.gameState.topRight > 0) {
+                if (Bomberman.countBombsEnemy2 < Bomberman.maxBombEnemy2) {
+                    Bomberman.levelRoot.appendChild(new Bomberman.Bomb(fc.Vector2.ONE(1), new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y), 2));
+                    Bomberman.countBombsEnemy2++;
+                    this.state = Bomberman.STATE.FLEE;
+                    this.changeState(Bomberman.STATE.FLEE);
+                    fc.Time.game.setTimer(6000, 1, this.setHunt);
+                }
+            }
+        }
+        fleeBomb(_direction) {
+            if (_direction == "up") {
+                if (this.checkWalls(new fc.Vector2(Bomberman.enemies2.mtxLocal.translation.x + 1, Bomberman.enemies2.mtxLocal.translation.y)) == false) {
+                    this.walkEnemies(Bomberman.WALK.RIGHT);
+                }
+                else if (this.checkWalls(new fc.Vector2(Bomberman.enemies2.mtxLocal.translation.x - 1, Bomberman.enemies2.mtxLocal.translation.y)) == false) {
+                    this.walkEnemies(Bomberman.WALK.LEFT);
+                }
+                else {
+                    this.walkEnemies(Bomberman.WALK.UP);
+                }
+            }
+            if (_direction == "right") {
+                if (this.checkWalls(new fc.Vector2(Bomberman.enemies2.mtxLocal.translation.x, Bomberman.enemies2.mtxLocal.translation.y + 1)) == false) {
+                    this.walkEnemies(Bomberman.WALK.UP);
+                }
+                else if (this.checkWalls(new fc.Vector2(Bomberman.enemies2.mtxLocal.translation.x, Bomberman.enemies2.mtxLocal.translation.y - 1)) == false) {
+                    this.walkEnemies(Bomberman.WALK.DOWN);
+                }
+                else {
+                    this.walkEnemies(Bomberman.WALK.RIGHT);
+                }
+            }
+            if (_direction == "down") {
+                if (this.checkWalls(new fc.Vector2(Bomberman.enemies2.mtxLocal.translation.x + 1, Bomberman.enemies2.mtxLocal.translation.y)) == false) {
+                    this.walkEnemies(Bomberman.WALK.RIGHT);
+                }
+                else if (this.checkWalls(new fc.Vector2(Bomberman.enemies2.mtxLocal.translation.x - 1, Bomberman.enemies2.mtxLocal.translation.y)) == false) {
+                    this.walkEnemies(Bomberman.WALK.LEFT);
+                }
+                else {
+                    this.walkEnemies(Bomberman.WALK.DOWN);
+                }
+            }
+            if (_direction == "left") {
+                if (this.checkWalls(new fc.Vector2(Bomberman.enemies2.mtxLocal.translation.x, Bomberman.enemies2.mtxLocal.translation.y + 1)) == false) {
+                    this.walkEnemies(Bomberman.WALK.UP);
+                }
+                else if (this.checkWalls(new fc.Vector2(Bomberman.enemies2.mtxLocal.translation.x, Bomberman.enemies2.mtxLocal.translation.y - 1)) == false) {
+                    this.walkEnemies(Bomberman.WALK.DOWN);
+                }
+                else {
+                    this.walkEnemies(Bomberman.WALK.LEFT);
+                }
+            }
+        }
+        checkEnemyDeath() {
+            if (Bomberman.gameState.topRight == 0) {
+                Bomberman.root.removeChild(Bomberman.enemies2);
+                Bomberman.enemies2.removeAllChildren();
+            }
+        }
+    }
+    Bomberman.Enemy2 = Enemy2;
+})(Bomberman || (Bomberman = {}));
+///<reference path= "GameObject.ts"/>
+var Bomberman;
+///<reference path= "GameObject.ts"/>
+(function (Bomberman) {
+    var fc = FudgeCore;
+    var fcAid = FudgeAid;
+    class Enemy3 extends Bomberman.GameObject {
+        constructor(_position) {
+            super("Enemies3", new fc.Vector2(0.8, 0.8), _position);
+            this.state = Bomberman.STATE.HUNT;
+            this.job = Bomberman.WALK.DOWN;
+            this.findPlayer = () => {
+                let travelVector;
+                travelVector = Bomberman.avatar.mtxLocal.translation;
+                travelVector.subtract(this.mtxLocal.translation);
+                if (travelVector.x < 0) {
+                    this.walkEnemies(Bomberman.WALK.LEFT);
+                }
+                if (travelVector.x > 0) {
+                    this.walkEnemies(Bomberman.WALK.RIGHT);
+                }
+                if (travelVector.y < 0) {
+                    this.walkEnemies(Bomberman.WALK.DOWN);
+                }
+                if (travelVector.y > 0) {
+                    this.walkEnemies(Bomberman.WALK.UP);
+                }
+                if (this.state == Bomberman.STATE.HUNT) {
+                    fc.Time.game.setTimer(1000, 1, this.findPlayer);
+                }
+            };
+            this.setHunt = () => {
+                this.changeState(Bomberman.STATE.HUNT);
+            };
+            this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
+            this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
+            this.sprite = new fcAid.NodeSprite("EnemySprite3");
+            this.sprite.addComponent(new fc.ComponentTransform());
+            this.sprite.mtxLocal.translateY(-0.25);
+            this.sprite.mtxLocal.translateZ(0.001);
+            this.appendChild(this.sprite);
+            this.sprite.setAnimation(Enemy3.animations["WALK_DOWN"]);
+            this.sprite.showFrame(0);
+            this.sprite.setFrameDirection(1);
+            this.sprite.framerate = 6;
+            this.changeState(this.state);
+        }
+        static generateSprites(_spritesheet) {
+            Enemy3.animations = {};
+            for (let i = 0; i < 4; i++) {
+                let name = "WALK_" + Bomberman.WALK[i];
+                let sprite = new fcAid.SpriteSheetAnimation(name, _spritesheet);
+                sprite.generateByGrid(fc.Rectangle.GET(0, i * 64, 64, 64), 6, 82, fc.ORIGIN2D.BOTTOMCENTER, fc.Vector2.X(64));
+                Enemy3.animations[name] = sprite;
+            }
+        }
+        update() {
+            this.checkEnemyDanger();
+            this.checkEnemyDeath();
+        }
+        checkEnemyCollision() {
+            for (let wall of Bomberman.wallsNode.getChildren()) {
+                if (Bomberman.enemies3.checkCollision(wall)) {
+                    Bomberman.enemies3.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let wall of Bomberman.explodableBlockNode.getChildren()) {
+                if (Bomberman.enemies3.checkCollision(wall)) {
+                    Bomberman.enemies3.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let bomb of Bomberman.levelRoot.getChildrenByName("Bomb")) {
+                if (Bomberman.enemies3.checkCollision(bomb)) {
+                    Bomberman.enemies3.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let flames of Bomberman.levelRoot.getChildrenByName("Flames")) {
+                if (Bomberman.enemies3.checkCollision(flames)) {
+                    Bomberman.enemies3.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let avatar of Bomberman.root.getChildrenByName("Bomberman")) {
+                if (Bomberman.enemies3.checkCollision(avatar)) {
+                    Bomberman.enemies3.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let enemies of Bomberman.root.getChildrenByName("Enemies")) {
+                if (Bomberman.enemies3.checkCollision(enemies)) {
+                    Bomberman.enemies3.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let enemies2 of Bomberman.root.getChildrenByName("Enemies2")) {
+                if (Bomberman.enemies3.checkCollision(enemies2)) {
+                    Bomberman.enemies3.mtxLocal.translation = this.tempPos;
+                }
+            }
+            for (let portal of Bomberman.levelRoot.getChildrenByName("Portal")) {
+                if (Bomberman.enemies3.checkCollision(portal)) {
+                    let portals = new Bomberman.Portal(new fc.Vector2(0, 0), -1);
+                    portals.teleportPortal(portal);
+                }
+            }
+        }
+        checkEnemyDanger() {
+            let _position = this.mtxLocal.translation;
+            let positionX;
+            let positionY;
+            for (let bomb of Bomberman.levelRoot.getChildrenByName("Bomb")) {
+                if (this.mtxLocal.translation.toVector2().equals(bomb.mtxLocal.translation.toVector2())) {
+                    if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x + 1, this.mtxLocal.translation.y)) == false) {
+                        this.walkEnemies(Bomberman.WALK.RIGHT);
+                    }
+                    else if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y - 1)) == false) {
+                        this.walkEnemies(Bomberman.WALK.DOWN);
+                    }
+                    else if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x - 1, this.mtxLocal.translation.y)) == false) {
+                        this.walkEnemies(Bomberman.WALK.LEFT);
+                    }
+                    else if (this.checkWalls(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y + 1)) == false) {
+                        this.walkEnemies(Bomberman.WALK.UP);
+                    }
+                }
+            }
+            for (let i = 1; i <= Bomberman.flameDistance; i++) {
+                positionX = new fc.Vector2(_position.x + i, _position.y);
+                if (this.checkWalls(positionX) == true) {
+                    break;
+                }
+                if (this.checkBombs(positionX) == true) {
+                    this.fleeBomb("left");
+                }
+                if (this.detectPlayer(positionX) == true) {
+                    this.bombPlayer();
+                }
+            }
+            for (let i = 1; i <= Bomberman.flameDistance; i++) {
+                positionY = new fc.Vector2(_position.x, _position.y + i);
+                if (this.checkWalls(positionY) == true) {
+                    break;
+                }
+                if (this.checkBombs(positionY) == true) {
+                    this.fleeBomb("down");
+                }
+                if (this.detectPlayer(positionY) == true) {
+                    this.bombPlayer();
+                }
+            }
+            for (let i = -1; i >= -Bomberman.flameDistance; i--) {
+                positionX = new fc.Vector2(_position.x + i, _position.y);
+                if (this.checkWalls(positionX) == true) {
+                    break;
+                }
+                if (this.checkBombs(positionX) == true) {
+                    this.fleeBomb("right");
+                }
+                if (this.detectPlayer(positionX) == true) {
+                    this.bombPlayer();
+                }
+            }
+            for (let i = -1; i >= -Bomberman.flameDistance; i--) {
+                positionY = new fc.Vector2(_position.x, _position.y + i);
+                if (this.checkWalls(positionY) == true) {
+                    break;
+                }
+                if (this.checkBombs(positionY) == true) {
+                    this.fleeBomb("up");
+                }
+                if (this.detectPlayer(positionY) == true) {
+                    this.bombPlayer();
+                }
+            }
+        }
+        checkWalls(_position) {
+            for (let wall of Bomberman.wallsNode.getChildren()) {
+                if (_position.equals(wall.mtxLocal.translation.toVector2())) {
+                    return true;
+                }
+            }
+            for (let explodableBlock of Bomberman.explodableBlockNode.getChildren()) {
+                if (_position.equals(explodableBlock.mtxLocal.translation.toVector2())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        checkBombs(_position) {
+            for (let bomb of Bomberman.levelRoot.getChildrenByName("Bomb")) {
+                if (_position.equals(bomb.mtxLocal.translation.toVector2())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        walkEnemies(_job) {
+            this.job = _job;
+            this.tempPos = Bomberman.enemies3.mtxLocal.translation;
+            switch (this.job) {
+                case Bomberman.WALK.UP:
+                    Bomberman.enemies3.sprite.setAnimation(Enemy3.animations["WALK_UP"]);
+                    Bomberman.enemies3.mtxLocal.translateY(1);
+                    break;
+                case Bomberman.WALK.RIGHT:
+                    Bomberman.enemies3.sprite.setAnimation(Enemy3.animations["WALK_RIGHT"]);
+                    Bomberman.enemies3.mtxLocal.translateX(1);
+                    break;
+                case Bomberman.WALK.DOWN:
+                    Bomberman.enemies3.sprite.setAnimation(Enemy3.animations["WALK_DOWN"]);
+                    Bomberman.enemies3.mtxLocal.translateY(-1);
+                    break;
+                case Bomberman.WALK.LEFT:
+                    Bomberman.enemies3.sprite.setAnimation(Enemy3.animations["WALK_LEFT"]);
+                    Bomberman.enemies3.mtxLocal.translateX(-1);
+                    break;
+            }
+            this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
+            this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
+            this.checkEnemyCollision();
+            this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
+            this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
+        }
+        changeState(_state) {
+            this.state = _state;
+            switch (this.state) {
+                case Bomberman.STATE.HUNT:
+                    fc.Time.game.setTimer(1000, 1, this.findPlayer);
+                    break;
+                case Bomberman.STATE.CHECK:
+                    break;
+                case Bomberman.STATE.FLEE:
+                    //this.fleeBomb();
+                    break;
+            }
+        }
+        detectPlayer(_position) {
+            if (_position.equals(Bomberman.avatar.mtxLocal.translation.toVector2())) {
+                return true;
+            }
+            return false;
+        }
+        bombPlayer() {
+            if (Bomberman.gameState.bottomRight > 0) {
+                if (Bomberman.countBombsEnemy3 < Bomberman.maxBombEnemy3) {
+                    Bomberman.levelRoot.appendChild(new Bomberman.Bomb(fc.Vector2.ONE(1), new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y), 3));
+                    Bomberman.countBombsEnemy3++;
+                    this.state = Bomberman.STATE.FLEE;
+                    this.changeState(Bomberman.STATE.FLEE);
+                    fc.Time.game.setTimer(6000, 1, this.setHunt);
+                }
+            }
+        }
+        fleeBomb(_direction) {
+            if (_direction == "up") {
+                if (this.checkWalls(new fc.Vector2(Bomberman.enemies3.mtxLocal.translation.x + 1, Bomberman.enemies3.mtxLocal.translation.y)) == false) {
+                    this.walkEnemies(Bomberman.WALK.RIGHT);
+                }
+                else if (this.checkWalls(new fc.Vector2(Bomberman.enemies3.mtxLocal.translation.x - 1, Bomberman.enemies3.mtxLocal.translation.y)) == false) {
+                    this.walkEnemies(Bomberman.WALK.LEFT);
+                }
+                else {
+                    this.walkEnemies(Bomberman.WALK.UP);
+                }
+            }
+            if (_direction == "right") {
+                if (this.checkWalls(new fc.Vector2(Bomberman.enemies3.mtxLocal.translation.x, Bomberman.enemies3.mtxLocal.translation.y + 1)) == false) {
+                    this.walkEnemies(Bomberman.WALK.UP);
+                }
+                else if (this.checkWalls(new fc.Vector2(Bomberman.enemies3.mtxLocal.translation.x, Bomberman.enemies3.mtxLocal.translation.y - 1)) == false) {
+                    this.walkEnemies(Bomberman.WALK.DOWN);
+                }
+                else {
+                    this.walkEnemies(Bomberman.WALK.RIGHT);
+                }
+            }
+            if (_direction == "down") {
+                if (this.checkWalls(new fc.Vector2(Bomberman.enemies3.mtxLocal.translation.x + 1, Bomberman.enemies3.mtxLocal.translation.y)) == false) {
+                    this.walkEnemies(Bomberman.WALK.RIGHT);
+                }
+                else if (this.checkWalls(new fc.Vector2(Bomberman.enemies3.mtxLocal.translation.x - 1, Bomberman.enemies3.mtxLocal.translation.y)) == false) {
+                    this.walkEnemies(Bomberman.WALK.LEFT);
+                }
+                else {
+                    this.walkEnemies(Bomberman.WALK.DOWN);
+                }
+            }
+            if (_direction == "left") {
+                if (this.checkWalls(new fc.Vector2(Bomberman.enemies3.mtxLocal.translation.x, Bomberman.enemies3.mtxLocal.translation.y + 1)) == false) {
+                    this.walkEnemies(Bomberman.WALK.UP);
+                }
+                else if (this.checkWalls(new fc.Vector2(Bomberman.enemies3.mtxLocal.translation.x, Bomberman.enemies3.mtxLocal.translation.y - 1)) == false) {
+                    this.walkEnemies(Bomberman.WALK.DOWN);
+                }
+                else {
+                    this.walkEnemies(Bomberman.WALK.LEFT);
+                }
+            }
+        }
+        checkEnemyDeath() {
+            if (Bomberman.gameState.bottomRight == 0) {
+                Bomberman.root.removeChild(Bomberman.enemies3);
+                Bomberman.enemies3.removeAllChildren();
+            }
+        }
+    }
+    Bomberman.Enemy3 = Enemy3;
 })(Bomberman || (Bomberman = {}));
 var Bomberman;
 (function (Bomberman) {
@@ -591,6 +1301,9 @@ var Bomberman;
     class Flames extends Bomberman.GameObject {
         constructor(_position) {
             super("Flames", new fc.Vector2(0.8, 0.8), _position);
+            this.setLifeLimiter = () => {
+                Bomberman.lifeLimiter = false;
+            };
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
             this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
             this.sprite = new fcAid.NodeSprite("FlamesSprite");
@@ -674,17 +1387,37 @@ var Bomberman;
             for (let flames of Bomberman.levelRoot.getChildrenByName("Flames")) {
                 fc.Time.game.setTimer(3000, 1, this.removeFlames.bind(flames));
                 if (Bomberman.avatar.checkCollision(flames)) {
-                    cmpAudio.play(true);
-                    console.log("MINUS LEBEN" + Bomberman.avatar.mtxLocal.translation);
-                    Bomberman.gameState.bottomLeft--;
+                    if (Bomberman.lifeLimiter == false) {
+                        if (Bomberman.lifeInvincibility == false) {
+                            Bomberman.gameState.bottomLeft--;
+                            Bomberman.hndDeaths();
+                            Bomberman.lifeLimiter = true;
+                            fc.Time.game.setTimer(3000, 1, this.setLifeLimiter);
+                        }
+                    }
                 }
             }
-            /*       for (let flames of levelRoot.getChildrenByName("Flames")) {
-                    if (enemies.checkCollision(<GameObject>flames)) {
-                      console.log("MINUS LEBEN FÜR BÖSE MANN");
-                      gameState.topRight--;
-                    }
-                  } */
+            for (let flames of Bomberman.levelRoot.getChildrenByName("Flames")) {
+                if (Bomberman.enemies.checkCollision(flames)) {
+                    if (Bomberman.gameState.topLeft > 0)
+                        Bomberman.gameState.topLeft--;
+                    Bomberman.hndDeaths();
+                }
+            }
+            for (let flames of Bomberman.levelRoot.getChildrenByName("Flames")) {
+                if (Bomberman.enemies2.checkCollision(flames)) {
+                    if (Bomberman.gameState.topRight > 0)
+                        Bomberman.gameState.topRight--;
+                    Bomberman.hndDeaths();
+                }
+            }
+            for (let flames of Bomberman.levelRoot.getChildrenByName("Flames")) {
+                if (Bomberman.enemies3.checkCollision(flames)) {
+                    if (Bomberman.gameState.bottomRight > 0)
+                        Bomberman.gameState.bottomRight--;
+                    Bomberman.hndDeaths();
+                }
+            }
         }
         checkFlameCollision(_position) {
             for (let flames of Bomberman.levelRoot.getChildrenByName("Flames")) {
@@ -738,8 +1471,8 @@ var Bomberman;
             this.topRight = 3;
             this.bottomLeft = 3;
             this.bottomRight = 3;
+            this.controls = "WASD  :  Moving      SPACE  :  Bomb";
         }
-        //public time: String = "00:00";
         reduceMutator(_mutator) { }
     }
     Bomberman.GameState = GameState;
@@ -837,6 +1570,9 @@ var Bomberman;
             switch (this.job) {
                 case ITEM.BOMB_PLUS:
                     Bomberman.maxBomb++;
+                    Bomberman.maxBombEnemy++;
+                    Bomberman.maxBombEnemy2++;
+                    Bomberman.maxBombEnemy3++;
                     break;
                 case ITEM.FLAME_PLUS:
                     Bomberman.flameDistance++;
@@ -848,7 +1584,7 @@ var Bomberman;
                     Bomberman.diagonalBomb = true;
                     break;
                 case ITEM.LIFE_INVINCIBILITY:
-                    console.log("UNSTERBLICH");
+                    Bomberman.lifeInvincibility = true;
                     break;
                 case ITEM.LIFE_PLUS:
                     break;
@@ -888,25 +1624,94 @@ var Bomberman;
             }
         }
         createBlocks() {
-            for (let i = 0; i < Bomberman.arenaSize.x - 1; i = i + 2) {
-                for (let j = 0; j < Bomberman.arenaSize.y - 1; j = j + 2) {
-                    Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2 + i, 2 + j)));
-                }
-            }
-            for (let i = 0; i < Bomberman.arenaSize.y - 1; i = i + 2) {
-                for (let j = 0; j < Bomberman.arenaSize.x - 1; j = j + 2) {
-                    Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(2 + j, 1 + i)));
-                }
-            }
-            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(1, 7), 0));
-            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(7, 1), 1));
-            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(9, 1), 2));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_PLUS", new fc.Vector2(3, 7)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("FLAME_PLUS", new fc.Vector2(5, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 5)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(3, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(3, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(5, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(5, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(5, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(5, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(5, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(7, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(7, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(7, 5)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(8, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(8, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(8, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 5)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(12, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(12, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(12, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(13, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(13, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(13, 5)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(15, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(15, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(15, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(15, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(15, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(17, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(17, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 5)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(1, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(1, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(1, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(1, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(3, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(3, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(3, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(5, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(5, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 7)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(7, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(7, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(10, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(10, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(10, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(13, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(13, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(14, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(14, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(14, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(14, 7)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(15, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(15, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 7)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(17, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(17, 7)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(18, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(18, 7)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(6, 4), 0));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(14, 4), 1));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_PLUS", new fc.Vector2(1, 4)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("FLAME_PLUS", new fc.Vector2(13, 1)));
             Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_CIRCLE", new fc.Vector2(7, 7)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_DIAGONAL", new fc.Vector2(9, 7)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_INVINCIBILITY", new fc.Vector2(11, 7)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_PLUS", new fc.Vector2(13, 7)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_DIAGONAL", new fc.Vector2(7, 1)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_INVINCIBILITY", new fc.Vector2(13, 7)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_PLUS", new fc.Vector2(19, 4)));
         }
     }
     Bomberman.LevelBuilder = LevelBuilder;
@@ -918,6 +1723,8 @@ var Bomberman;
     Bomberman.clrWhite = fc.Color.CSS("WHITE");
     let cmpAudio;
     let backgroundTheme = new fc.Audio("Assets/sounds/theme.mp3");
+    let soundDeath = new fc.Audio("Assets/sounds/death.wav");
+    let soundVictory = new fc.Audio("Assets/sounds/victory.wav");
     Bomberman.root = new fc.Node("Root");
     Bomberman.levelRoot = new fc.Node("LevelNode");
     Bomberman.floorNode = new fc.Node("FloorNode");
@@ -939,6 +1746,10 @@ var Bomberman;
         Bomberman.root.appendChild(Bomberman.avatar);
         Bomberman.enemies = await hndEnemies();
         Bomberman.root.appendChild(Bomberman.enemies);
+        Bomberman.enemies2 = await hndEnemies2();
+        Bomberman.root.appendChild(Bomberman.enemies2);
+        Bomberman.enemies3 = await hndEnemies3();
+        Bomberman.root.appendChild(Bomberman.enemies3);
         await hndBomb();
         await hndFlames();
         await hndPortal();
@@ -957,7 +1768,10 @@ var Bomberman;
         canvas.addEventListener("click", canvas.requestPointerLock);
     }
     function hndLoop(_event) {
+        Bomberman.avatar.checkPlayerDeath();
         Bomberman.enemies.update();
+        Bomberman.enemies2.update();
+        Bomberman.enemies3.update();
         Bomberman.viewport.draw();
     }
     function createArena() {
@@ -977,9 +1791,24 @@ var Bomberman;
         txtEnemy.load("Assets/enemies/enemy_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
         Bomberman.Enemy.generateSprites(coatSprite);
-        Bomberman.enemies = new Bomberman.Enemy(new fc.Vector2(Bomberman.arenaSize.x - 2, Bomberman.arenaSize.y - 2));
-        //enemies = new Enemy(new fc.Vector2(1, 7));
+        Bomberman.enemies = new Bomberman.Enemy(new fc.Vector2(1, Bomberman.arenaSize.y - 2));
         return Bomberman.enemies;
+    }
+    async function hndEnemies2() {
+        let txtEnemy = new fc.TextureImage();
+        txtEnemy.load("Assets/enemies/enemy_sprites.png");
+        let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
+        Bomberman.Enemy2.generateSprites(coatSprite);
+        Bomberman.enemies2 = new Bomberman.Enemy2(new fc.Vector2(Bomberman.arenaSize.x - 2, Bomberman.arenaSize.y - 2));
+        return Bomberman.enemies2;
+    }
+    async function hndEnemies3() {
+        let txtEnemy = new fc.TextureImage();
+        txtEnemy.load("Assets/enemies/enemy_sprites.png");
+        let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
+        Bomberman.Enemy3.generateSprites(coatSprite);
+        Bomberman.enemies3 = new Bomberman.Enemy3(new fc.Vector2(Bomberman.arenaSize.x - 2, 1));
+        return Bomberman.enemies3;
     }
     async function hndBomb() {
         let txtBomb = new fc.TextureImage();
@@ -1007,6 +1836,52 @@ var Bomberman;
         txtItems.load("Assets/items/items_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtItems);
         Bomberman.Items.generateSprites(coatSprite);
+    }
+    function hndDeaths() {
+        if (Bomberman.gameState.bottomLeft <= 0) {
+            cmpAudio.play(false);
+            cmpAudio = new fc.ComponentAudio(soundDeath, false, false);
+            cmpAudio.connect(true);
+            cmpAudio.volume = 0.05;
+            cmpAudio.setAudio(soundDeath);
+            cmpAudio.play(true);
+            let gameOver = document.createElement("div");
+            gameOver.id = "gameOverContent";
+            let gameOverText = document.createElement("p");
+            gameOverText.id = "gameOverTextID";
+            gameOverText.innerHTML = "GAME OVER";
+            gameOver.appendChild(gameOverText);
+            let gameOverButton = document.createElement("button");
+            gameOverButton.id = "gameOverButtonID";
+            gameOverButton.innerHTML = "RESTART";
+            gameOver.appendChild(gameOverButton);
+            gameOverButton.addEventListener("click", hndRestart);
+            document.getElementById("gameOverDIV").appendChild(gameOver);
+        }
+        if (Bomberman.gameState.topLeft <= 0 && Bomberman.gameState.topRight <= 0 && Bomberman.gameState.bottomRight <= 0) {
+            cmpAudio.play(false);
+            cmpAudio = new fc.ComponentAudio(soundVictory, false, false);
+            cmpAudio.connect(true);
+            cmpAudio.volume = 0.05;
+            cmpAudio.setAudio(soundVictory);
+            cmpAudio.play(true);
+            let gameOver = document.createElement("div");
+            gameOver.id = "gameOverContent";
+            let gameOverText = document.createElement("p");
+            gameOverText.id = "gameOverTextID";
+            gameOverText.innerHTML = "YOU WON";
+            gameOver.appendChild(gameOverText);
+            let gameOverButton = document.createElement("button");
+            gameOverButton.id = "gameOverButtonID";
+            gameOverButton.innerHTML = "RESTART";
+            gameOver.appendChild(gameOverButton);
+            gameOverButton.addEventListener("click", hndRestart);
+            document.getElementById("gameOverDIV").appendChild(gameOver);
+        }
+    }
+    Bomberman.hndDeaths = hndDeaths;
+    function hndRestart(_event) {
+        location.reload();
     }
 })(Bomberman || (Bomberman = {}));
 var Bomberman;
@@ -1051,6 +1926,8 @@ var Bomberman;
             fc.Time.game.setTimer(1000, 1, this.stopAnimation.bind(_portals));
             let avatarPos = Bomberman.avatar.mtxLocal.translation;
             let enemyPos = Bomberman.enemies.mtxLocal.translation;
+            let enemyPos2 = Bomberman.enemies2.mtxLocal.translation;
+            let enemyPos3 = Bomberman.enemies3.mtxLocal.translation;
             for (let i = 0; i <= portalArray.length - 1; i++) {
                 if (avatarPos.equals(portalArray[i].toVector3())) {
                     if (i == portalArray.length - 1) {
@@ -1068,6 +1945,26 @@ var Bomberman;
                     }
                     else {
                         Bomberman.enemies.mtxLocal.translation = portalArray[i + 1].toVector3();
+                    }
+                }
+            }
+            for (let i = 0; i <= portalArray.length - 1; i++) {
+                if (enemyPos2.equals(portalArray[i].toVector3())) {
+                    if (i == portalArray.length - 1) {
+                        Bomberman.enemies2.mtxLocal.translation = portalArray[0].toVector3();
+                    }
+                    else {
+                        Bomberman.enemies2.mtxLocal.translation = portalArray[i + 1].toVector3();
+                    }
+                }
+            }
+            for (let i = 0; i <= portalArray.length - 1; i++) {
+                if (enemyPos3.equals(portalArray[i].toVector3())) {
+                    if (i == portalArray.length - 1) {
+                        Bomberman.enemies3.mtxLocal.translation = portalArray[0].toVector3();
+                    }
+                    else {
+                        Bomberman.enemies3.mtxLocal.translation = portalArray[i + 1].toVector3();
                     }
                 }
             }

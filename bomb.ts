@@ -31,6 +31,10 @@ namespace Bomberman {
       fc.Time.game.setTimer(3000, 1, this.explodeBomb);
       if (_source == 1)
       fc.Time.game.setTimer(3000, 1, this.explodeBombEnemy);
+      if (_source == 2)
+      fc.Time.game.setTimer(3000, 1, this.explodeBombEnemy2);
+      if (_source == 3)
+      fc.Time.game.setTimer(3000, 1, this.explodeBombEnemy3);
     }
 
     public static generateSprites(_spritesheet: fc.CoatTextured, _spritesheet2: fc.CoatTextured): void {
@@ -97,5 +101,54 @@ namespace Bomberman {
       countBombsEnemy--;
     }
 
+    private explodeBombEnemy2 = (): void => {
+      cmpAudio = new fc.ComponentAudio(soundBomb, false, false);
+      cmpAudio.connect(true);
+      cmpAudio.volume = 0.05;
+      cmpAudio.setAudio(soundBomb);
+      cmpAudio.play(true);
+
+      this.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Bomb.animations["EXPLODE"]);
+      let flames: Flames = new Flames(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y)); 
+
+      if (circleBomb == true)
+      flames.circleBombFlames(flames.mtxLocal.translation);
+      else if (diagonalBomb == true)
+      flames.diagonalBombFlames(flames.mtxLocal.translation);
+      else
+      flames.placeFlames(flames.mtxLocal.translation);
+
+      fc.Time.game.setTimer(1000, 1, this.removeBombEnemy2);
+    }
+
+    private removeBombEnemy2 = (): void => {
+      levelRoot.removeChild(this);
+      countBombsEnemy2--;
+    }
+
+    private explodeBombEnemy3 = (): void => {
+      cmpAudio = new fc.ComponentAudio(soundBomb, false, false);
+      cmpAudio.connect(true);
+      cmpAudio.volume = 0.05;
+      cmpAudio.setAudio(soundBomb);
+      cmpAudio.play(true);
+
+      this.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Bomb.animations["EXPLODE"]);
+      let flames: Flames = new Flames(new fc.Vector2(this.mtxLocal.translation.x, this.mtxLocal.translation.y)); 
+
+      if (circleBomb == true)
+      flames.circleBombFlames(flames.mtxLocal.translation);
+      else if (diagonalBomb == true)
+      flames.diagonalBombFlames(flames.mtxLocal.translation);
+      else
+      flames.placeFlames(flames.mtxLocal.translation);
+
+      fc.Time.game.setTimer(1000, 1, this.removeBombEnemy3);
+    }
+
+    private removeBombEnemy3 = (): void => {
+      levelRoot.removeChild(this);
+      countBombsEnemy3--;
+    }
   }
 }

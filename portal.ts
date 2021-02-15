@@ -57,6 +57,8 @@ namespace Bomberman {
 
       let avatarPos: fc.Vector3 = avatar.mtxLocal.translation;
       let enemyPos: fc.Vector3 = enemies.mtxLocal.translation;
+      let enemyPos2: fc.Vector3 = enemies2.mtxLocal.translation;
+      let enemyPos3: fc.Vector3 = enemies3.mtxLocal.translation;
 
       for (let i: number = 0; i <= portalArray.length - 1; i++) {
         if (avatarPos.equals(portalArray[i].toVector3())) {
@@ -74,6 +76,26 @@ namespace Bomberman {
             enemies.mtxLocal.translation = portalArray[0].toVector3();
           } else {
             enemies.mtxLocal.translation = portalArray[i + 1].toVector3();
+          }
+        }
+      }
+
+      for (let i: number = 0; i <= portalArray.length - 1; i++) {
+        if (enemyPos2.equals(portalArray[i].toVector3())) {
+          if (i == portalArray.length - 1) {
+            enemies2.mtxLocal.translation = portalArray[0].toVector3();
+          } else {
+            enemies2.mtxLocal.translation = portalArray[i + 1].toVector3();
+          }
+        }
+      }
+
+      for (let i: number = 0; i <= portalArray.length - 1; i++) {
+        if (enemyPos3.equals(portalArray[i].toVector3())) {
+          if (i == portalArray.length - 1) {
+            enemies3.mtxLocal.translation = portalArray[0].toVector3();
+          } else {
+            enemies3.mtxLocal.translation = portalArray[i + 1].toVector3();
           }
         }
       }
