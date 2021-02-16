@@ -23,15 +23,19 @@ namespace Bomberman {
   export let enemies3: Enemy3;
 
   export let arenaSize: fc.Vector2 = new fc.Vector2(21, 9);
+  export let level: number;
 
   async function hndLoad(_event: Event): Promise<void> {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
+    await communicate("data.json");
 
     cmpAudio = new fc.ComponentAudio(backgroundTheme, true, false);
     cmpAudio.connect(true);
     cmpAudio.volume = 0.2;
     cmpAudio.setAudio(backgroundTheme);
     cmpAudio.play(true);
+
+    level = gameSettings.level;
 
     levelRoot.appendChild(floorNode);
     levelRoot.appendChild(wallsNode);
@@ -55,7 +59,7 @@ namespace Bomberman {
     await hndPortal();
     await hndItems();
 
-    createArena();
+    createArena(level);
 
     let cmpCamera: fc.ComponentCamera = new fc.ComponentCamera();
     cmpCamera.projectCentral(1, 45, fc.FIELD_OF_VIEW.DIAGONAL, 0.2, 10000);
@@ -70,9 +74,6 @@ namespace Bomberman {
     fc.Loop.start(fc.LOOP_MODE.TIME_GAME, 60);
 
     Hud.start();
-
-    canvas.addEventListener("click", canvas.requestPointerLock);
-
   }
 
   function hndLoop(_event: Event): void {
@@ -83,9 +84,9 @@ namespace Bomberman {
     viewport.draw();
   }
 
-  function createArena(): void {
+  function createArena(_level: number): void {
     let levelTest: LevelBuilder = new LevelBuilder();
-    levelTest.createLevel();
+    levelTest.createLevel(_level);
   }
   
   async function hndAvatar(): Promise<Avatar> {

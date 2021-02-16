@@ -354,6 +354,15 @@ var Bomberman;
     }
     Bomberman.Bomb = Bomb;
 })(Bomberman || (Bomberman = {}));
+var Bomberman;
+(function (Bomberman) {
+    async function communicate(_url) {
+        let response = await fetch(_url);
+        let gameSettingsJSON = await response.json();
+        Bomberman.gameSettings = gameSettingsJSON;
+    }
+    Bomberman.communicate = communicate;
+})(Bomberman || (Bomberman = {}));
 ///<reference path= "GameObject.ts"/>
 var Bomberman;
 ///<reference path= "GameObject.ts"/>
@@ -1463,14 +1472,11 @@ var Bomberman;
 })(Bomberman || (Bomberman = {}));
 var Bomberman;
 (function (Bomberman) {
+    var fc = FudgeCore;
     var fui = FudgeUserInterface;
-    class GameState extends ƒ.Mutable {
+    class GameState extends fc.Mutable {
         constructor() {
             super(...arguments);
-            this.topLeft = 3;
-            this.topRight = 3;
-            this.bottomLeft = 3;
-            this.bottomRight = 3;
             this.controls = "WASD  :  Moving      SPACE  :  Bomb";
         }
         reduceMutator(_mutator) { }
@@ -1478,15 +1484,20 @@ var Bomberman;
     Bomberman.GameState = GameState;
     Bomberman.gameState = new GameState();
     class Hud {
-        static start() {
+        static async start() {
+            await Bomberman.communicate("data.json");
             let domHud = document.querySelector("div#hud");
+            Bomberman.gameState.bottomLeft = Bomberman.gameSettings.avatarLives;
+            Bomberman.gameState.topLeft = Bomberman.gameSettings.enemyLives1;
+            Bomberman.gameState.topRight = Bomberman.gameSettings.enemyLives2;
+            Bomberman.gameState.bottomRight = Bomberman.gameSettings.enemyLives3;
             this.loop();
             Hud.controller = new fui.Controller(Bomberman.gameState, domHud);
             Hud.controller.updateUserInterface();
         }
         static loop() {
             let time = document.querySelector("[key=time]");
-            let date = new Date(ƒ.Time.game.get());
+            let date = new Date(fc.Time.game.get());
             time.value =
                 String(date.getMinutes()).padStart(2, "0") + ":" +
                     String(date.getSeconds()).padStart(2, "0");
@@ -1600,10 +1611,15 @@ var Bomberman;
         constructor() {
             this.rootNumber = 0;
         }
-        createLevel() {
+        createLevel(_level) {
             this.createFloor();
             this.createBorder();
-            this.createBlocks();
+            if (_level == 1)
+                this.createBlocks();
+            if (_level == 2)
+                this.createBlocks2();
+            if (_level == 3)
+                this.createBlocks3();
             return new LevelBuilder();
         }
         createFloor() {
@@ -1624,6 +1640,99 @@ var Bomberman;
             }
         }
         createBlocks() {
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_PLUS", new fc.Vector2(5, 7)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("FLAME_PLUS", new fc.Vector2(15, 1)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_CIRCLE", new fc.Vector2(12, 4)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_DIAGONAL", new fc.Vector2(8, 4)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_INVINCIBILITY", new fc.Vector2(15, 7)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_PLUS", new fc.Vector2(5, 1)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(1, 4), 0));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(10, 7), 1));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(19, 4), 2));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(10, 1), 3));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(1, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(1, 5)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 5)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(4, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(4, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(6, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(6, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(6, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(9, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(9, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(11, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(11, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(14, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(14, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(14, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(16, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(16, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 5)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(19, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(19, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(3, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(3, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(3, 7)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 7)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(5, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(5, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(5, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(5, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(7, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(10, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(10, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(13, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(14, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(14, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(15, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(15, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(15, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(15, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 7)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(17, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(17, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(17, 7)));
+        }
+        createBlocks2() {
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_PLUS", new fc.Vector2(1, 4)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("FLAME_PLUS", new fc.Vector2(13, 1)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_CIRCLE", new fc.Vector2(7, 7)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_DIAGONAL", new fc.Vector2(7, 1)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_INVINCIBILITY", new fc.Vector2(13, 7)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_PLUS", new fc.Vector2(19, 4)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(6, 4), 0));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(14, 4), 1));
             Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 2)));
             Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 3)));
             Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 5)));
@@ -1704,14 +1813,79 @@ var Bomberman;
             Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(17, 7)));
             Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(18, 1)));
             Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(18, 7)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(6, 4), 0));
-            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(14, 4), 1));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_PLUS", new fc.Vector2(1, 4)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("FLAME_PLUS", new fc.Vector2(13, 1)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_CIRCLE", new fc.Vector2(7, 7)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_DIAGONAL", new fc.Vector2(7, 1)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_INVINCIBILITY", new fc.Vector2(13, 7)));
-            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_PLUS", new fc.Vector2(19, 4)));
+        }
+        createBlocks3() {
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_PLUS", new fc.Vector2(7, 3)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("FLAME_PLUS", new fc.Vector2(13, 5)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_CIRCLE", new fc.Vector2(10, 2)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_DIAGONAL", new fc.Vector2(10, 6)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_INVINCIBILITY", new fc.Vector2(7, 5)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Items("LIFE_PLUS", new fc.Vector2(13, 3)));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(5, 4), 0));
+            Bomberman.levelRoot.appendChild(new Bomberman.Portal(new fc.Vector2(15, 4), 1));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(2, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(3, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(3, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(3, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(4, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(6, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(6, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(6, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(7, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(8, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 1)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 3)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 5)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 7)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(12, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(13, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(14, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(14, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(14, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(16, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(17, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(17, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(17, 6)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 2)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 4)));
+            Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(18, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(1, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(7, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(7, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(9, 7)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(10, 4)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 1)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(11, 7)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(12, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(13, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(13, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(14, 3)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(14, 5)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 2)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 6)));
+            Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(19, 4)));
         }
     }
     Bomberman.LevelBuilder = LevelBuilder;
@@ -1733,11 +1907,13 @@ var Bomberman;
     Bomberman.arenaSize = new fc.Vector2(21, 9);
     async function hndLoad(_event) {
         const canvas = document.querySelector("canvas");
+        await Bomberman.communicate("data.json");
         cmpAudio = new fc.ComponentAudio(backgroundTheme, true, false);
         cmpAudio.connect(true);
         cmpAudio.volume = 0.2;
         cmpAudio.setAudio(backgroundTheme);
         cmpAudio.play(true);
+        Bomberman.level = Bomberman.gameSettings.level;
         Bomberman.levelRoot.appendChild(Bomberman.floorNode);
         Bomberman.levelRoot.appendChild(Bomberman.wallsNode);
         Bomberman.levelRoot.appendChild(Bomberman.explodableBlockNode);
@@ -1754,7 +1930,7 @@ var Bomberman;
         await hndFlames();
         await hndPortal();
         await hndItems();
-        createArena();
+        createArena(Bomberman.level);
         let cmpCamera = new fc.ComponentCamera();
         cmpCamera.projectCentral(1, 45, fc.FIELD_OF_VIEW.DIAGONAL, 0.2, 10000);
         cmpCamera.pivot.translation = new fc.Vector3(Bomberman.arenaSize.x / 2 - 0.5, Bomberman.arenaSize.y / 2 - 0.5, 20);
@@ -1765,7 +1941,6 @@ var Bomberman;
         fc.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, hndLoop);
         fc.Loop.start(fc.LOOP_MODE.TIME_GAME, 60);
         Bomberman.Hud.start();
-        canvas.addEventListener("click", canvas.requestPointerLock);
     }
     function hndLoop(_event) {
         Bomberman.avatar.checkPlayerDeath();
@@ -1774,9 +1949,9 @@ var Bomberman;
         Bomberman.enemies3.update();
         Bomberman.viewport.draw();
     }
-    function createArena() {
+    function createArena(_level) {
         let levelTest = new Bomberman.LevelBuilder();
-        levelTest.createLevel();
+        levelTest.createLevel(_level);
     }
     async function hndAvatar() {
         let txtAvatar = new fc.TextureImage();
