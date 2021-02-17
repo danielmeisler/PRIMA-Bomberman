@@ -5,8 +5,8 @@ namespace Bomberman {
   import fcAid = FudgeAid;
 
   let cmpAudio: fc.ComponentAudio;
-  let soundWalk: fc.Audio = new fc.Audio(".../Assets/sounds/walk.wav");
-  let soundItems: fc.Audio = new fc.Audio(".../Assets/sounds/items.mp3");
+  let soundWalk: fc.Audio = new fc.Audio("../Assets/sounds/walk.wav");
+  let soundItems: fc.Audio = new fc.Audio("../Assets/sounds/items.mp3");
 
   export class Avatar extends GameObject {
     private static animations: fcAid.SpriteSheetAnimations;
@@ -40,6 +40,9 @@ namespace Bomberman {
       }
     }
 
+    // Avatar Steuerung + Überprüfung der Kollisionen usw.
+    // Ist alles in der selben Methode, weil durch das Keyboard Event ich
+    // nichts übergeben konnte und somit in die selbe Methode schreiben musste.
     public avatarControls(event: KeyboardEvent): void {
       cmpAudio = new fc.ComponentAudio(soundWalk, false, false);
       cmpAudio.connect(true);
@@ -174,30 +177,34 @@ namespace Bomberman {
       }
       for (let items of levelRoot.getChildrenByName("LIFE_PLUS")) {
         if (avatar.checkCollision(<GameObject>items)) {
-          gameState.bottomLeft++;
+          let item: Items = new Items("LIFE_PLUS", new fc.Vector2(0, 0));
+          item.itemChanger();
           cmpAudio.play(true);
           levelRoot.removeChild(items);
         }
       }
-
     }
 
+    // Überprüft ob Spieler tot ist.
     public checkPlayerDeath(): void {
       if (gameState.bottomLeft <= 0) {
         root.removeChild(avatar);
       }
     }
 
+    //Beim Aufnehmen vom Item "INVINCIBILITY" wird es visuell dargestellt und auf 10sek gesetzt.
     private setShield(): void {
-      (<HTMLDivElement>document.getElementById("hud_bottomLeftInput")).style.color = "BLACK";
+      (<HTMLDivElement>document.getElementById("hud_bottomLeftInput")).style.color = "YELLOW";
       fc.Time.game.setTimer(10000, 1, avatar.setInvinciblity);
     }
 
+    //Unsterblichkeit nach 10 Sekunden ist vorbei und wird wieder visuell zurückgestellt.
     private setInvinciblity = (): void => {
       (<HTMLDivElement>document.getElementById("hud_bottomLeftInput")).style.color = "WHITE";
       lifeInvincibility = false;
     }
 
+    //Einstellung dass man nach einem Treffer für 3 Sekunden geschützt ist und nicht mehrere Leben verliert.
     private setLifeLimiter = (): void => {
       lifeLimiter = false;
     }

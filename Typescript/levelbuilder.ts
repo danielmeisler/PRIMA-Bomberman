@@ -5,6 +5,7 @@ namespace Bomberman {
 
     public rootNumber: number = 0;
 
+    // Level wird erstellt und mit Übergabeparameter ausgewählt welches Level gespielt wird.
     public createLevel(_level: number): LevelBuilder {
 
       this.createFloor();
@@ -22,12 +23,12 @@ namespace Bomberman {
       return new LevelBuilder();
     }
 
-
+    // Boden in Größe der Arena wird erstellt.
     private createFloor(): void {
       floorNode.appendChild(new Floor(arenaSize, fc.Vector2.ZERO()));
     }
 
-
+    // Ein Rand in Größe der Arena wird erstellt.
     private createBorder(): void {
       for (let i: number = 0; i < arenaSize.x; i++) {
         wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(this.rootNumber + i, this.rootNumber)));
@@ -43,6 +44,7 @@ namespace Bomberman {
       }
     }
 
+    // Inhalt von Level 1 wird erstellt.
     private createBlocks(): void {
 
       levelRoot.appendChild(new Items("BOMB_PLUS", new fc.Vector2(5, 7)));
@@ -158,6 +160,7 @@ namespace Bomberman {
 
     }
 
+    // Inhalt von Level 2 wird erstellt.
     private createBlocks2(): void {
 
       levelRoot.appendChild(new Items("BOMB_PLUS", new fc.Vector2(1, 4)));
@@ -282,6 +285,7 @@ namespace Bomberman {
 
     }
 
+    // Inhalt von Level 3 wird erstellt.
     private createBlocks3(): void {
 
       levelRoot.appendChild(new Items("BOMB_PLUS", new fc.Vector2(7, 3)));

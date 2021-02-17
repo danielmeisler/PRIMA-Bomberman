@@ -1,0 +1,12 @@
+{
+  "level": 1,
+  "godmode": false,
+  "avatarLives": 3,
+  "enemyLives1": 3,
+  "enemyLives2": 3,
+  "enemyLives3": 3,
+  "maxBomb": 1,
+  "maxBombEnemy": 1,
+  "maxBombEnemy2": 1,
+  "maxBombEnemy3": 1
+}

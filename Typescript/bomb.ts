@@ -5,7 +5,7 @@ namespace Bomberman {
   import fcAid = FudgeAid;
 
   let cmpAudio: fc.ComponentAudio;
-  let soundBomb: fc.Audio = new fc.Audio(".../Assets/sounds/explosion.wav");
+  let soundBomb: fc.Audio = new fc.Audio("../Assets/sounds/explosion.wav");
 
   export class Bomb extends GameObject {
     private static animations: fcAid.SpriteSheetAnimations;
@@ -51,6 +51,8 @@ namespace Bomberman {
       Bomb.animations[name2] = spriteExplode;
     }
 
+    // Vorher platzierte Bombe explodiert und entscheidet welche Art von Explosion.
+    // Startet Timer nach 1 Sekunde zum Entfernen der Bombe.
     private explodeBomb = (): void => {
       cmpAudio = new fc.ComponentAudio(soundBomb, false, false);
       cmpAudio.connect(true);
@@ -71,11 +73,13 @@ namespace Bomberman {
       fc.Time.game.setTimer(1000, 1, this.removeBomb);
     }
 
+    //Bombe wird entfernt und Zähler für wie viele Bombem gleichzeitig gelegt werden dürfen wird zurückgesetzt.
     private removeBomb = (): void => {
       levelRoot.removeChild(this);
       countBombs--;
     }
 
+    //Bomben der Feinde werden unterteilt hauptsächlich wegen den verschiedenen Variablen, damit sie sich nicht kreuzen.
     private explodeBombEnemy = (): void => {
       cmpAudio = new fc.ComponentAudio(soundBomb, false, false);
       cmpAudio.connect(true);
@@ -96,6 +100,7 @@ namespace Bomberman {
       fc.Time.game.setTimer(1000, 1, this.removeBombEnemy);
     }
 
+    //Bombe für Enemy wird entfernt.
     private removeBombEnemy = (): void => {
       levelRoot.removeChild(this);
       countBombsEnemy--;

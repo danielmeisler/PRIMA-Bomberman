@@ -3,7 +3,7 @@ namespace Bomberman {
   import fcAid = FudgeAid;
 
   let cmpAudio: fc.ComponentAudio;
-  let soundHit: fc.Audio = new fc.Audio(".../Assets/sounds/hit.wav");
+  let soundHit: fc.Audio = new fc.Audio("../Assets/sounds/hit.wav");
 
   export let flameDistance: number = 2;
 
@@ -38,8 +38,9 @@ namespace Bomberman {
       Flames.animations[name] = sprite;
     }
 
+    // Flammen werden nach der Bombenexplosion platziert und in alle vier Achsen abhängig von der Flammengröße platziert.
+    // Dabei wird überprüft ob sich eine Wand auf dem Weg befindet und abgebrochen. Falls es ein Block ist, wird dieser zerstört.
     public placeFlames(_position: fc.Vector3): void {
-
       let positionX: fc.Vector2;
       let positionY: fc.Vector2;
 
@@ -47,19 +48,14 @@ namespace Bomberman {
 
       for (let i: number = 1; i <= flameDistance; i++) {
         positionX = new fc.Vector2(_position.x + i, _position.y);
-
         levelRoot.appendChild(new Flames(positionX));
-
         if (this.checkFlameCollision(positionX) == true) {
           break;
         }
-
       }
       for (let i: number = 1; i <= flameDistance; i++) {
         positionY = new fc.Vector2(_position.x, _position.y + i);
-
         levelRoot.appendChild(new Flames(positionY));
-
         if (this.checkFlameCollision(positionY) == true) {
           break;
         }
@@ -67,9 +63,7 @@ namespace Bomberman {
 
       for (let i: number = -1; i >= -flameDistance; i--) {
         positionX = new fc.Vector2(_position.x + i, _position.y);
-
         levelRoot.appendChild(new Flames(positionX));
-
         if (this.checkFlameCollision(positionX) == true) {
           break;
         }
@@ -77,9 +71,7 @@ namespace Bomberman {
 
       for (let i: number = -1; i >= -flameDistance; i--) {
         positionY = new fc.Vector2(_position.x, _position.y + i);
-
         levelRoot.appendChild(new Flames(positionY));
-
         if (this.checkFlameCollision(positionY) == true) {
           break;
         }
@@ -87,12 +79,12 @@ namespace Bomberman {
       this.lowerLife();
     }
 
+    // Andere Explosionsart. Statt in vier Achsen geht die Explosion im Kreis bzw. Block.
+    // Da es ein Item ist und einmalig wird der boolean auch wieder auf false gesetzt.
     public circleBombFlames(_position: fc.Vector3): void {
       for (let i: number = -flameDistance; i <= flameDistance; i++) {
         for (let j: number = -flameDistance; j <= flameDistance; j++) {
-
           let positionCircle: fc.Vector2 = new fc.Vector2(_position.x + i, _position.y + j);
-
           levelRoot.appendChild(new Flames(positionCircle));
           this.checkFlameCollision(positionCircle);
         }
@@ -101,6 +93,8 @@ namespace Bomberman {
       circleBomb = false;
     }
 
+    // Andere Explosionsart. Statt in vier Achsen geht die Explosion in die Diagonalen.
+    // Da es ein Item ist und einmalig wird der boolean auch wieder auf false gesetzt.
     public diagonalBombFlames(_position: fc.Vector3): void {
       for (let i: number = -flameDistance; i <= flameDistance; i++) {
         let positionDiagonal: fc.Vector2 = new fc.Vector2(_position.x + i, _position.y + i);
@@ -116,6 +110,7 @@ namespace Bomberman {
       diagonalBomb = false;
     }
 
+    // Überprüfung ob Flammen mit einem Spieler/Enemy kollidieren und zieht Leben ab.
     public lowerLife(): void {
       cmpAudio = new fc.ComponentAudio(soundHit, false, false);
       cmpAudio.connect(true);
@@ -137,29 +132,29 @@ namespace Bomberman {
       }
       for (let flames of levelRoot.getChildrenByName("Flames")) {
         if (enemies.checkCollision(<GameObject>flames)) {
-          if (gameState.topLeft > 0) 
-          gameState.topLeft--;
+          if (gameState.topLeft > 0)
+            gameState.topLeft--;
           hndDeaths();
         }
-      } 
+      }
       for (let flames of levelRoot.getChildrenByName("Flames")) {
         if (enemies2.checkCollision(<GameObject>flames)) {
           if (gameState.topRight > 0)
-          gameState.topRight--;
+            gameState.topRight--;
           hndDeaths();
         }
-      } 
+      }
       for (let flames of levelRoot.getChildrenByName("Flames")) {
         if (enemies3.checkCollision(<GameObject>flames)) {
           if (gameState.bottomRight > 0)
-          gameState.bottomRight--;
+            gameState.bottomRight--;
           hndDeaths();
         }
-      } 
+      }
     }
 
+    // Überprüfung der Kollision mit Wand/Block.
     private checkFlameCollision(_position: fc.Vector2): boolean {
-
       for (let flames of levelRoot.getChildrenByName("Flames") as GameObject[]) {
         for (let wall of wallsNode.getChildren()) {
           if (flames.checkCollision(<GameObject>wall)) {
@@ -168,7 +163,6 @@ namespace Bomberman {
           }
         }
       }
-
       for (let flames of levelRoot.getChildrenByName("Flames") as GameObject[]) {
         for (let explodableBlock of explodableBlockNode.getChildren()) {
           if (flames.checkCollision(<GameObject>explodableBlock)) {
@@ -179,11 +173,13 @@ namespace Bomberman {
       }
       return false;
     }
-    
+
+    // Setzt boolean, damit man nicht mehrere Leben verliert, falls man durch die selben Flammen läuft.
     private setLifeLimiter = (): void => {
       lifeLimiter = false;
     }
 
+    // Flammen werden entfernt nach Timerablauf.
     private removeFlames(): void {
       levelRoot.removeChild(this);
     }

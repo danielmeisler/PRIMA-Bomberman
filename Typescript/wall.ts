@@ -7,7 +7,7 @@ namespace Bomberman {
       super("Wall", _size, _position);
 
       let txtWall: fc.TextureImage = new fc.TextureImage;
-      txtWall.load(".../Assets/tiles/SolidBlock.png");
+      txtWall.load("../Assets/tiles/SolidBlock.png");
       let mtrWall: fc.Material = new fc.Material("BorderWall", fc.ShaderTexture, new fc.CoatTextured(clrWhite, txtWall));
       let cmpMaterial: fc.ComponentMaterial = new fc.ComponentMaterial(mtrWall);
       

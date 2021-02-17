@@ -6,13 +6,8 @@ var Bomberman;
     Bomberman.countBombsEnemy = 0;
     Bomberman.countBombsEnemy2 = 0;
     Bomberman.countBombsEnemy3 = 0;
-    Bomberman.maxBomb = 1;
-    Bomberman.maxBombEnemy = 1;
-    Bomberman.maxBombEnemy2 = 1;
-    Bomberman.maxBombEnemy3 = 1;
     Bomberman.circleBomb = false;
     Bomberman.diagonalBomb = false;
-    Bomberman.lifeInvincibility = false;
     Bomberman.lifeLimiter = false;
     let WALK;
     (function (WALK) {
@@ -30,12 +25,25 @@ var Bomberman;
             this.addComponent(cmpQuad);
             cmpQuad.pivot.scale(_size.toVector3(0));
         }
+        // Intersection Überprüfung.
         checkCollision(_target) {
             let intersection = this.rect.getIntersection(_target.rect);
             if (intersection == null) {
                 return false;
             }
             return true;
+        }
+        // Startwerte werden übergeben.
+        static async start() {
+            await Bomberman.communicate("../Typescript/data.json");
+            Bomberman.maxBomb = Bomberman.gameSettings.maxBomb;
+            Bomberman.maxBombEnemy = Bomberman.gameSettings.maxBombEnemy;
+            Bomberman.maxBombEnemy2 = Bomberman.gameSettings.maxBombEnemy2;
+            Bomberman.maxBombEnemy3 = Bomberman.gameSettings.maxBombEnemy3;
+            Bomberman.lifeInvincibility = Bomberman.gameSettings.godmode;
+            if (Bomberman.lifeInvincibility == true) {
+                document.getElementById("hud_bottomLeftInput").style.color = "YELLOW";
+            }
         }
     }
     GameObject.meshQuad = new fc.MeshQuad();
@@ -48,16 +56,18 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundWalk = new fc.Audio(".../Assets/sounds/walk.wav");
-    let soundItems = new fc.Audio(".../Assets/sounds/items.mp3");
+    let soundWalk = new fc.Audio("../Assets/sounds/walk.wav");
+    let soundItems = new fc.Audio("../Assets/sounds/items.mp3");
     class Avatar extends Bomberman.GameObject {
         constructor(_position) {
             super("Bomberman", new fc.Vector2(0.8, 0.8), _position);
             this.job = Bomberman.WALK.DOWN;
+            //Unsterblichkeit nach 10 Sekunden ist vorbei und wird wieder visuell zurückgestellt.
             this.setInvinciblity = () => {
                 document.getElementById("hud_bottomLeftInput").style.color = "WHITE";
                 Bomberman.lifeInvincibility = false;
             };
+            //Einstellung dass man nach einem Treffer für 3 Sekunden geschützt ist und nicht mehrere Leben verliert.
             this.setLifeLimiter = () => {
                 Bomberman.lifeLimiter = false;
             };
@@ -81,6 +91,9 @@ var Bomberman;
                 Avatar.animations[name] = sprite;
             }
         }
+        // Avatar Steuerung + Überprüfung der Kollisionen usw.
+        // Ist alles in der selben Methode, weil durch das Keyboard Event ich
+        // nichts übergeben konnte und somit in die selbe Methode schreiben musste.
         avatarControls(event) {
             cmpAudio = new fc.ComponentAudio(soundWalk, false, false);
             cmpAudio.connect(true);
@@ -210,19 +223,22 @@ var Bomberman;
             }
             for (let items of Bomberman.levelRoot.getChildrenByName("LIFE_PLUS")) {
                 if (Bomberman.avatar.checkCollision(items)) {
-                    Bomberman.gameState.bottomLeft++;
+                    let item = new Bomberman.Items("LIFE_PLUS", new fc.Vector2(0, 0));
+                    item.itemChanger();
                     cmpAudio.play(true);
                     Bomberman.levelRoot.removeChild(items);
                 }
             }
         }
+        // Überprüft ob Spieler tot ist.
         checkPlayerDeath() {
             if (Bomberman.gameState.bottomLeft <= 0) {
                 Bomberman.root.removeChild(Bomberman.avatar);
             }
         }
+        //Beim Aufnehmen vom Item "INVINCIBILITY" wird es visuell dargestellt und auf 10sek gesetzt.
         setShield() {
-            document.getElementById("hud_bottomLeftInput").style.color = "BLACK";
+            document.getElementById("hud_bottomLeftInput").style.color = "YELLOW";
             fc.Time.game.setTimer(10000, 1, Bomberman.avatar.setInvinciblity);
         }
     }
@@ -235,10 +251,12 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundBomb = new fc.Audio(".../Assets/sounds/explosion.wav");
+    let soundBomb = new fc.Audio("../Assets/sounds/explosion.wav");
     class Bomb extends Bomberman.GameObject {
         constructor(_size, _position, _source) {
             super("Bomb", _size, _position);
+            // Vorher platzierte Bombe explodiert und entscheidet welche Art von Explosion.
+            // Startet Timer nach 1 Sekunde zum Entfernen der Bombe.
             this.explodeBomb = () => {
                 cmpAudio = new fc.ComponentAudio(soundBomb, false, false);
                 cmpAudio.connect(true);
@@ -255,10 +273,12 @@ var Bomberman;
                     flames.placeFlames(flames.mtxLocal.translation);
                 fc.Time.game.setTimer(1000, 1, this.removeBomb);
             };
+            //Bombe wird entfernt und Zähler für wie viele Bombem gleichzeitig gelegt werden dürfen wird zurückgesetzt.
             this.removeBomb = () => {
                 Bomberman.levelRoot.removeChild(this);
                 Bomberman.countBombs--;
             };
+            //Bomben der Feinde werden unterteilt hauptsächlich wegen den verschiedenen Variablen, damit sie sich nicht kreuzen.
             this.explodeBombEnemy = () => {
                 cmpAudio = new fc.ComponentAudio(soundBomb, false, false);
                 cmpAudio.connect(true);
@@ -275,6 +295,7 @@ var Bomberman;
                     flames.placeFlames(flames.mtxLocal.translation);
                 fc.Time.game.setTimer(1000, 1, this.removeBombEnemy);
             };
+            //Bombe für Enemy wird entfernt.
             this.removeBombEnemy = () => {
                 Bomberman.levelRoot.removeChild(this);
                 Bomberman.countBombsEnemy--;
@@ -370,14 +391,15 @@ var Bomberman;
     let STATE;
     (function (STATE) {
         STATE[STATE["HUNT"] = 0] = "HUNT";
-        STATE[STATE["CHECK"] = 1] = "CHECK";
-        STATE[STATE["FLEE"] = 2] = "FLEE";
+        STATE[STATE["FLEE"] = 1] = "FLEE";
     })(STATE = Bomberman.STATE || (Bomberman.STATE = {}));
     class Enemy extends Bomberman.GameObject {
         constructor(_position) {
             super("Enemies", new fc.Vector2(0.8, 0.8), _position);
             this.state = STATE.HUNT;
             this.job = Bomberman.WALK.DOWN;
+            // Der Spieler wird gesucht und verfolgt.
+            // Aber nur solange er im HUNT-State ist und nicht im Ausweich.
             this.findPlayer = () => {
                 let travelVector;
                 travelVector = Bomberman.avatar.mtxLocal.translation;
@@ -398,6 +420,7 @@ var Bomberman;
                     fc.Time.game.setTimer(1000, 1, this.findPlayer);
                 }
             };
+            // Setzt den HUNT-State
             this.setHunt = () => {
                 this.changeState(STATE.HUNT);
             };
@@ -427,6 +450,7 @@ var Bomberman;
             this.checkEnemyDanger();
             this.checkEnemyDeath();
         }
+        //Kollisionsüberprüfung
         checkEnemyCollision() {
             for (let wall of Bomberman.wallsNode.getChildren()) {
                 if (Bomberman.enemies.checkCollision(wall)) {
@@ -470,6 +494,8 @@ var Bomberman;
                 }
             }
         }
+        // Überprüfung in alle Achsen, was sich dort befindet.
+        // Falls Bombe weicht er aus. Wände blockieren die Sicht.
         checkEnemyDanger() {
             let _position = this.mtxLocal.translation;
             let positionX;
@@ -539,6 +565,7 @@ var Bomberman;
                 }
             }
         }
+        // Überprüfung ob eine Wand oder Block seine Sicht blockiert.
         checkWalls(_position) {
             for (let wall of Bomberman.wallsNode.getChildren()) {
                 if (_position.equals(wall.mtxLocal.translation.toVector2())) {
@@ -552,6 +579,7 @@ var Bomberman;
             }
             return false;
         }
+        // Überprüfung ob eine Bombe platziert wurde.
         checkBombs(_position) {
             for (let bomb of Bomberman.levelRoot.getChildrenByName("Bomb")) {
                 if (_position.equals(bomb.mtxLocal.translation.toVector2())) {
@@ -560,6 +588,7 @@ var Bomberman;
             }
             return false;
         }
+        // Steuerung des Feindes.
         walkEnemies(_job) {
             this.job = _job;
             this.tempPos = Bomberman.enemies.mtxLocal.translation;
@@ -587,24 +616,25 @@ var Bomberman;
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
             this.rect.position.y = this.mtxLocal.translation.y - this.rect.size.y / 2;
         }
+        // Zustände werden geändert.
         changeState(_state) {
             this.state = _state;
             switch (this.state) {
                 case STATE.HUNT:
                     fc.Time.game.setTimer(1000, 1, this.findPlayer);
                     break;
-                case STATE.CHECK:
-                    break;
                 case STATE.FLEE:
                     break;
             }
         }
+        // Überprüfung ob der Spieler in Bombenreichweite ist.
         detectPlayer(_position) {
             if (_position.equals(Bomberman.avatar.mtxLocal.translation.toVector2())) {
                 return true;
             }
             return false;
         }
+        // Platziert Bomben und wechselt zum FlEE-State und nach 6 Sekunden wieder in den HUNT-State.
         bombPlayer() {
             if (Bomberman.gameState.topLeft > 0) {
                 if (Bomberman.countBombsEnemy < Bomberman.maxBombEnemy) {
@@ -616,6 +646,7 @@ var Bomberman;
                 }
             }
         }
+        // Weicht den Bomben aus, jenachdem in welcher Richtung sich die Bombe befindet.
         fleeBomb(_direction) {
             if (_direction == "up") {
                 if (this.checkWalls(new fc.Vector2(Bomberman.enemies.mtxLocal.translation.x + 1, Bomberman.enemies.mtxLocal.translation.y)) == false) {
@@ -662,6 +693,7 @@ var Bomberman;
                 }
             }
         }
+        // Überprüfung ob dieser Enemy tot ist.
         checkEnemyDeath() {
             if (Bomberman.gameState.topLeft <= 0) {
                 Bomberman.root.removeChild(Bomberman.enemies);
@@ -677,6 +709,10 @@ var Bomberman;
 (function (Bomberman) {
     var fc = FudgeCore;
     var fcAid = FudgeAid;
+    // Kommentare bei Enemy.ts, da alles im Grunde gleich ist.
+    // Es gibt drei Enemy.ts, die exakt gleich sind, weil ich am Anfang falsch programmiert habe und somit 
+    // nicht so einfach mehrere generieren konnte, weil der Code auf einen einzelnen ausgelegt ist, weil ich
+    // immer nur mit einem Enemy getestet habe. Aus Zeitgründen habe ich TypeScript und Variablen einfach kopiert.
     class Enemy2 extends Bomberman.GameObject {
         constructor(_position) {
             super("Enemies2", new fc.Vector2(0.8, 0.8), _position);
@@ -897,10 +933,7 @@ var Bomberman;
                 case Bomberman.STATE.HUNT:
                     fc.Time.game.setTimer(1000, 1, this.findPlayer);
                     break;
-                case Bomberman.STATE.CHECK:
-                    break;
                 case Bomberman.STATE.FLEE:
-                    //this.fleeBomb();
                     break;
             }
         }
@@ -982,6 +1015,10 @@ var Bomberman;
 (function (Bomberman) {
     var fc = FudgeCore;
     var fcAid = FudgeAid;
+    // Kommentare bei Enemy.ts, da alles im Grunde gleich ist.
+    // Es gibt drei Enemy.ts, die exakt gleich sind, weil ich am Anfang falsch programmiert habe und somit 
+    // nicht so einfach mehrere generieren konnte, weil der Code auf einen einzelnen ausgelegt ist, weil ich
+    // immer nur mit einem Enemy getestet habe. Aus Zeitgründen habe ich TypeScript und Variablen einfach kopiert.
     class Enemy3 extends Bomberman.GameObject {
         constructor(_position) {
             super("Enemies3", new fc.Vector2(0.8, 0.8), _position);
@@ -1202,10 +1239,7 @@ var Bomberman;
                 case Bomberman.STATE.HUNT:
                     fc.Time.game.setTimer(1000, 1, this.findPlayer);
                     break;
-                case Bomberman.STATE.CHECK:
-                    break;
                 case Bomberman.STATE.FLEE:
-                    //this.fleeBomb();
                     break;
             }
         }
@@ -1288,7 +1322,7 @@ var Bomberman;
         constructor(_size, _position) {
             super("ExplodableBlock", _size, _position);
             let txtWall = new fc.TextureImage();
-            txtWall.load(".../Assets/tiles/ExplodableBlock.png");
+            txtWall.load("../Assets/tiles/ExplodableBlock.png");
             let mtrWall = new fc.Material("ExplodableBlockMaterial", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtWall));
             let cmpMaterial = new fc.ComponentMaterial(mtrWall);
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
@@ -1303,11 +1337,12 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundHit = new fc.Audio(".../Assets/sounds/hit.wav");
+    let soundHit = new fc.Audio("../Assets/sounds/hit.wav");
     Bomberman.flameDistance = 2;
     class Flames extends Bomberman.GameObject {
         constructor(_position) {
             super("Flames", new fc.Vector2(0.8, 0.8), _position);
+            // Setzt boolean, damit man nicht mehrere Leben verliert, falls man durch die selben Flammen läuft.
             this.setLifeLimiter = () => {
                 Bomberman.lifeLimiter = false;
             };
@@ -1329,6 +1364,8 @@ var Bomberman;
             sprite.generateByGrid(fc.Rectangle.GET(0, 0, 48, 48), 5, 82, fc.ORIGIN2D.CENTER, fc.Vector2.X(48));
             Flames.animations[name] = sprite;
         }
+        // Flammen werden nach der Bombenexplosion platziert und in alle vier Achsen abhängig von der Flammengröße platziert.
+        // Dabei wird überprüft ob sich eine Wand auf dem Weg befindet und abgebrochen. Falls es ein Block ist, wird dieser zerstört.
         placeFlames(_position) {
             let positionX;
             let positionY;
@@ -1363,6 +1400,8 @@ var Bomberman;
             }
             this.lowerLife();
         }
+        // Andere Explosionsart. Statt in vier Achsen geht die Explosion im Kreis bzw. Block.
+        // Da es ein Item ist und einmalig wird der boolean auch wieder auf false gesetzt.
         circleBombFlames(_position) {
             for (let i = -Bomberman.flameDistance; i <= Bomberman.flameDistance; i++) {
                 for (let j = -Bomberman.flameDistance; j <= Bomberman.flameDistance; j++) {
@@ -1374,6 +1413,8 @@ var Bomberman;
             this.lowerLife();
             Bomberman.circleBomb = false;
         }
+        // Andere Explosionsart. Statt in vier Achsen geht die Explosion in die Diagonalen.
+        // Da es ein Item ist und einmalig wird der boolean auch wieder auf false gesetzt.
         diagonalBombFlames(_position) {
             for (let i = -Bomberman.flameDistance; i <= Bomberman.flameDistance; i++) {
                 let positionDiagonal = new fc.Vector2(_position.x + i, _position.y + i);
@@ -1386,6 +1427,7 @@ var Bomberman;
             this.lowerLife();
             Bomberman.diagonalBomb = false;
         }
+        // Überprüfung ob Flammen mit einem Spieler/Enemy kollidieren und zieht Leben ab.
         lowerLife() {
             cmpAudio = new fc.ComponentAudio(soundHit, false, false);
             cmpAudio.connect(true);
@@ -1426,6 +1468,7 @@ var Bomberman;
                 }
             }
         }
+        // Überprüfung der Kollision mit Wand/Block.
         checkFlameCollision(_position) {
             for (let flames of Bomberman.levelRoot.getChildrenByName("Flames")) {
                 for (let wall of Bomberman.wallsNode.getChildren()) {
@@ -1445,6 +1488,7 @@ var Bomberman;
             }
             return false;
         }
+        // Flammen werden entfernt nach Timerablauf.
         removeFlames() {
             Bomberman.levelRoot.removeChild(this);
         }
@@ -1458,7 +1502,7 @@ var Bomberman;
         constructor(_size, _position) {
             super("Floor", _size, _position);
             let txtFloor = new fc.TextureImage();
-            txtFloor.load(".../Assets/tiles/BackgroundTile.png");
+            txtFloor.load("../Assets/tiles/BackgroundTile.png");
             let mtrFloor = new fc.Material("Floor", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtFloor));
             let cmpMaterial = new fc.ComponentMaterial(mtrFloor);
             this.mtxLocal.translation = new fc.Vector3(_position.x + _size.x / 2 - 0.5, _position.y + _size.y / 2 - 0.5, -0.000001);
@@ -1475,15 +1519,16 @@ var Bomberman;
     class GameState extends fc.Mutable {
         constructor() {
             super(...arguments);
-            this.controls = "WASD  :  Moving      SPACE  :  Bomb";
+            this.controls = "Seite neuladen wenn Sprites fehlen!";
         }
         reduceMutator(_mutator) { }
     }
     Bomberman.GameState = GameState;
     Bomberman.gameState = new GameState();
     class Hud {
+        // Werte werden eingestellt zum Spielstart.
         static async start() {
-            await Bomberman.communicate("data.json");
+            await Bomberman.communicate("../Typescript/data.json");
             let domHud = document.querySelector("div#hud");
             Bomberman.gameState.bottomLeft = Bomberman.gameSettings.avatarLives;
             Bomberman.gameState.topLeft = Bomberman.gameSettings.enemyLives1;
@@ -1493,6 +1538,7 @@ var Bomberman;
             Hud.controller = new fui.Controller(Bomberman.gameState, domHud);
             Hud.controller.updateUserInterface();
         }
+        // Spielzeit wird im HUD oben angezeigt.
         static loop() {
             let time = document.querySelector("[key=time]");
             let date = new Date(fc.Time.game.get());
@@ -1529,6 +1575,7 @@ var Bomberman;
             this.sprite.showFrame(0);
             this.sprite.setFrameDirection(1);
             this.sprite.framerate = 6;
+            // Sprite und Effekt wird unterteilt.
             if (_name == "BOMB_PLUS") {
                 this.job = ITEM.BOMB_PLUS;
             }
@@ -1575,6 +1622,7 @@ var Bomberman;
             sprite6.generateByGrid(fc.Rectangle.GET(160, 0, 32, 32), 1, 82, fc.ORIGIN2D.BOTTOMCENTER, fc.Vector2.X(0));
             Items.animations[name6] = sprite6;
         }
+        // Item Effekte.
         itemChanger() {
             switch (this.job) {
                 case ITEM.BOMB_PLUS:
@@ -1596,6 +1644,7 @@ var Bomberman;
                     Bomberman.lifeInvincibility = true;
                     break;
                 case ITEM.LIFE_PLUS:
+                    Bomberman.gameState.bottomLeft++;
                     break;
             }
         }
@@ -1609,6 +1658,7 @@ var Bomberman;
         constructor() {
             this.rootNumber = 0;
         }
+        // Level wird erstellt und mit Übergabeparameter ausgewählt welches Level gespielt wird.
         createLevel(_level) {
             this.createFloor();
             this.createBorder();
@@ -1620,9 +1670,11 @@ var Bomberman;
                 this.createBlocks3();
             return new LevelBuilder();
         }
+        // Boden in Größe der Arena wird erstellt.
         createFloor() {
             Bomberman.floorNode.appendChild(new Bomberman.Floor(Bomberman.arenaSize, fc.Vector2.ZERO()));
         }
+        // Ein Rand in Größe der Arena wird erstellt.
         createBorder() {
             for (let i = 0; i < Bomberman.arenaSize.x; i++) {
                 Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(this.rootNumber + i, this.rootNumber)));
@@ -1637,6 +1689,7 @@ var Bomberman;
                 Bomberman.wallsNode.appendChild(new Bomberman.Wall(fc.Vector2.ONE(1), new fc.Vector2(Bomberman.arenaSize.x - 1, this.rootNumber + i)));
             }
         }
+        // Inhalt von Level 1 wird erstellt.
         createBlocks() {
             Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_PLUS", new fc.Vector2(5, 7)));
             Bomberman.levelRoot.appendChild(new Bomberman.Items("FLAME_PLUS", new fc.Vector2(15, 1)));
@@ -1722,6 +1775,7 @@ var Bomberman;
             Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(17, 4)));
             Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(17, 7)));
         }
+        // Inhalt von Level 2 wird erstellt.
         createBlocks2() {
             Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_PLUS", new fc.Vector2(1, 4)));
             Bomberman.levelRoot.appendChild(new Bomberman.Items("FLAME_PLUS", new fc.Vector2(13, 1)));
@@ -1812,6 +1866,7 @@ var Bomberman;
             Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(18, 1)));
             Bomberman.explodableBlockNode.appendChild(new Bomberman.ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(18, 7)));
         }
+        // Inhalt von Level 3 wird erstellt.
         createBlocks3() {
             Bomberman.levelRoot.appendChild(new Bomberman.Items("BOMB_PLUS", new fc.Vector2(7, 3)));
             Bomberman.levelRoot.appendChild(new Bomberman.Items("FLAME_PLUS", new fc.Vector2(13, 5)));
@@ -1894,9 +1949,9 @@ var Bomberman;
     window.addEventListener("load", hndLoad);
     Bomberman.clrWhite = fc.Color.CSS("WHITE");
     let cmpAudio;
-    let backgroundTheme = new fc.Audio(".../Assets/sounds/theme.mp3");
-    let soundDeath = new fc.Audio(".../Assets/sounds/death.wav");
-    let soundVictory = new fc.Audio(".../Assets/sounds/victory.wav");
+    let backgroundTheme = new fc.Audio("../Assets/sounds/theme.mp3");
+    let soundDeath = new fc.Audio("../Assets/sounds/death.wav");
+    let soundVictory = new fc.Audio("../Assets/sounds/victory.wav");
     Bomberman.root = new fc.Node("Root");
     Bomberman.levelRoot = new fc.Node("LevelNode");
     Bomberman.floorNode = new fc.Node("FloorNode");
@@ -1905,7 +1960,8 @@ var Bomberman;
     Bomberman.arenaSize = new fc.Vector2(21, 9);
     async function hndLoad(_event) {
         const canvas = document.querySelector("canvas");
-        await Bomberman.communicate("data.json");
+        await Bomberman.communicate("../Typescript/data.json");
+        Bomberman.GameObject.start();
         cmpAudio = new fc.ComponentAudio(backgroundTheme, true, false);
         cmpAudio.connect(true);
         cmpAudio.volume = 0.2;
@@ -1947,69 +2003,79 @@ var Bomberman;
         Bomberman.enemies3.update();
         Bomberman.viewport.draw();
     }
+    // Levelauswahl und Generierung des Levels.
     function createArena(_level) {
         let levelTest = new Bomberman.LevelBuilder();
         levelTest.createLevel(_level);
     }
+    // Avatar wird generiert und platziert.
     async function hndAvatar() {
         let txtAvatar = new fc.TextureImage();
-        txtAvatar.load(".../Assets/avatar/avatar_sprites.png");
+        txtAvatar.load("../Assets/avatar/avatar_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtAvatar);
         Bomberman.Avatar.generateSprites(coatSprite);
         Bomberman.avatar = new Bomberman.Avatar(new fc.Vector2(1, 1));
         return Bomberman.avatar;
     }
+    // Enemy 1 wird generiert und oben links der Arenagröße platziert.
     async function hndEnemies() {
         let txtEnemy = new fc.TextureImage();
-        txtEnemy.load(".../Assets/enemies/enemy_sprites.png");
+        txtEnemy.load("../Assets/enemies/enemy_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
         Bomberman.Enemy.generateSprites(coatSprite);
         Bomberman.enemies = new Bomberman.Enemy(new fc.Vector2(1, Bomberman.arenaSize.y - 2));
         return Bomberman.enemies;
     }
+    // Enemy 2 wird generiert und oben rechts der Arenagröße platziert.
     async function hndEnemies2() {
         let txtEnemy = new fc.TextureImage();
-        txtEnemy.load(".../Assets/enemies/enemy_sprites.png");
+        txtEnemy.load("../Assets/enemies/enemy_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
         Bomberman.Enemy2.generateSprites(coatSprite);
         Bomberman.enemies2 = new Bomberman.Enemy2(new fc.Vector2(Bomberman.arenaSize.x - 2, Bomberman.arenaSize.y - 2));
         return Bomberman.enemies2;
     }
+    // Enemy 3 wird generiert und unten rechts der Arenagröße platziert.
     async function hndEnemies3() {
         let txtEnemy = new fc.TextureImage();
-        txtEnemy.load(".../Assets/enemies/enemy_sprites.png");
+        txtEnemy.load("../Assets/enemies/enemy_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
         Bomberman.Enemy3.generateSprites(coatSprite);
         Bomberman.enemies3 = new Bomberman.Enemy3(new fc.Vector2(Bomberman.arenaSize.x - 2, 1));
         return Bomberman.enemies3;
     }
+    // Bomben und Sprites werden generiert.
     async function hndBomb() {
         let txtBomb = new fc.TextureImage();
-        txtBomb.load(".../Assets/items/bomb_sprites.png");
+        txtBomb.load("../Assets/items/bomb_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtBomb);
         let txtBombExplode = new fc.TextureImage();
-        txtBombExplode.load(".../Assets/items/bomb_explode.png");
+        txtBombExplode.load("../Assets/items/bomb_explode.png");
         let coatSprite2 = new fc.CoatTextured(Bomberman.clrWhite, txtBombExplode);
         Bomberman.Bomb.generateSprites(coatSprite, coatSprite2);
     }
+    // Flammen und Sprites werden generiert.
     async function hndFlames() {
         let txtFlames = new fc.TextureImage();
-        txtFlames.load(".../Assets/items/flames_sprites.png");
+        txtFlames.load("../Assets/items/flames_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtFlames);
         Bomberman.Flames.generateSprites(coatSprite);
     }
+    // Portale und Sprites werden generiert.
     async function hndPortal() {
         let txtTeleport = new fc.TextureImage();
-        txtTeleport.load(".../Assets/tiles/portal_sprites.png");
+        txtTeleport.load("../Assets/tiles/portal_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtTeleport);
         Bomberman.Portal.generateSprites(coatSprite);
     }
+    // Items und Sprites werden generiert.
     async function hndItems() {
         let txtItems = new fc.TextureImage();
-        txtItems.load(".../Assets/items/items_sprites.png");
+        txtItems.load("../Assets/items/items_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtItems);
         Bomberman.Items.generateSprites(coatSprite);
     }
+    // Überprüfung ob das Spiel vorbei ist und wer gewonnen hat.
     function hndDeaths() {
         if (Bomberman.gameState.bottomLeft <= 0) {
             cmpAudio.play(false);
@@ -2053,6 +2119,7 @@ var Bomberman;
         }
     }
     Bomberman.hndDeaths = hndDeaths;
+    // Neustart des Spiels.
     function hndRestart(_event) {
         location.reload();
     }
@@ -2062,7 +2129,7 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundTeleport = new fc.Audio(".../Assets/sounds/teleport.wav");
+    let soundTeleport = new fc.Audio("../Assets/sounds/teleport.wav");
     let portalArray = [];
     class Portal extends Bomberman.GameObject {
         constructor(_position, portalID) {
@@ -2089,6 +2156,7 @@ var Bomberman;
             sprite2.generateByGrid(fc.Rectangle.GET(0, 0, 64, 64), 18, 82, fc.ORIGIN2D.CENTER, fc.Vector2.X(64));
             Portal.animations[name2] = sprite2;
         }
+        // Teleportation und Verbindung der Portale bei Kollision mit Spieler/Enemy.
         teleportPortal(_portals) {
             cmpAudio = new fc.ComponentAudio(soundTeleport, false, false);
             cmpAudio.connect(true);
@@ -2142,6 +2210,7 @@ var Bomberman;
                 }
             }
         }
+        // Nach Beendigung des Teleports wird das Portal wieder normal.
         stopAnimation() {
             this.sprite.setAnimation(Portal.animations["PORTAL"]);
         }
@@ -2155,7 +2224,7 @@ var Bomberman;
         constructor(_size, _position) {
             super("Wall", _size, _position);
             let txtWall = new fc.TextureImage;
-            txtWall.load(".../Assets/tiles/SolidBlock.png");
+            txtWall.load("../Assets/tiles/SolidBlock.png");
             let mtrWall = new fc.Material("BorderWall", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtWall));
             let cmpMaterial = new fc.ComponentMaterial(mtrWall);
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;

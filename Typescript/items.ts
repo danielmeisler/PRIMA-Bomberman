@@ -25,6 +25,7 @@ namespace Bomberman {
       this.sprite.setFrameDirection(1);
       this.sprite.framerate = 6;
 
+      // Sprite und Effekt wird unterteilt.
       if (_name == "BOMB_PLUS") {
         this.job = ITEM.BOMB_PLUS;
       } else if (_name == "FLAME_PLUS") {
@@ -38,7 +39,7 @@ namespace Bomberman {
       } else if (_name == "LIFE_PLUS") {
         this.job = ITEM.LIFE_PLUS;
       }
-      
+
     }
 
     public static generateSprites(_spritesheet: fc.CoatTextured): void {
@@ -53,7 +54,7 @@ namespace Bomberman {
       let sprite2: fcAid.SpriteSheetAnimation = new fcAid.SpriteSheetAnimation(name2, _spritesheet);
       sprite2.generateByGrid(fc.Rectangle.GET(32, 0, 32, 32), 1, 82, fc.ORIGIN2D.BOTTOMCENTER, fc.Vector2.X(0));
       Items.animations[name2] = sprite2;
-        
+
       let name3: string = "BOMB_CIRCLE";
       let sprite3: fcAid.SpriteSheetAnimation = new fcAid.SpriteSheetAnimation(name3, _spritesheet);
       sprite3.generateByGrid(fc.Rectangle.GET(64, 0, 32, 32), 1, 82, fc.ORIGIN2D.BOTTOMCENTER, fc.Vector2.X(0));
@@ -75,38 +76,31 @@ namespace Bomberman {
       Items.animations[name6] = sprite6;
     }
 
+    // Item Effekte.
     public itemChanger(): void {
-      
       switch (this.job) {
         case ITEM.BOMB_PLUS:
-            maxBomb++;
-            maxBombEnemy++;
-            maxBombEnemy2++;
-            maxBombEnemy3++;
-            break;
+          maxBomb++;
+          maxBombEnemy++;
+          maxBombEnemy2++;
+          maxBombEnemy3++;
+          break;
         case ITEM.FLAME_PLUS:
-            flameDistance++;
-            break;
+          flameDistance++;
+          break;
         case ITEM.BOMB_CIRCLE:
-            circleBomb = true;
-            break;
+          circleBomb = true;
+          break;
         case ITEM.BOMB_DIAGONAL:
-            diagonalBomb = true;
-            break;
+          diagonalBomb = true;
+          break;
         case ITEM.LIFE_INVINCIBILITY:
-            lifeInvincibility = true;
-            break;
+          lifeInvincibility = true;
+          break;
         case ITEM.LIFE_PLUS:
-            
-            break;            
-          }
-
-
-
+          gameState.bottomLeft++;
+          break;
+      }
     }
-
-
-
   }
-
 }

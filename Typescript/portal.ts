@@ -3,7 +3,7 @@ namespace Bomberman {
   import fcAid = FudgeAid;
 
   let cmpAudio: fc.ComponentAudio;
-  let soundTeleport: fc.Audio = new fc.Audio(".../Assets/sounds/teleport.wav");
+  let soundTeleport: fc.Audio = new fc.Audio("../Assets/sounds/teleport.wav");
 
   let portalArray: fc.Vector2[] = [];
 
@@ -45,6 +45,7 @@ namespace Bomberman {
 
     }
 
+    // Teleportation und Verbindung der Portale bei Kollision mit Spieler/Enemy.
     public teleportPortal(_portals: Portal): void {
       cmpAudio = new fc.ComponentAudio(soundTeleport, false, false);
       cmpAudio.connect(true);
@@ -99,9 +100,9 @@ namespace Bomberman {
           }
         }
       }
-
     }
 
+    // Nach Beendigung des Teleports wird das Portal wieder normal.
     private stopAnimation(): void {
       this.sprite.setAnimation(<fcAid.SpriteSheetAnimation>Portal.animations["PORTAL"]);
     }

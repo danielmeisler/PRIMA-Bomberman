@@ -7,7 +7,7 @@ namespace Bomberman {
     public topLeft: number;
     public topRight: number;
     public bottomRight: number;
-    public controls: string = "WASD  :  Moving      SPACE  :  Bomb";
+    public controls: string = "Seite neuladen wenn Sprites fehlen!";
     protected reduceMutator(_mutator: fc.Mutator): void {/* */ }
   }
 
@@ -16,8 +16,9 @@ namespace Bomberman {
   export class Hud {
     private static controller: fui.Controller;
 
+    // Werte werden eingestellt zum Spielstart.
     public static async start(): Promise<void> {
-      await communicate("data.json");
+      await communicate("../Typescript/data.json");
       let domHud: HTMLDivElement = document.querySelector("div#hud");
 
       gameState.bottomLeft = gameSettings.avatarLives;
@@ -30,6 +31,7 @@ namespace Bomberman {
       Hud.controller.updateUserInterface();
     }
 
+    // Spielzeit wird im HUD oben angezeigt.
     public static loop(): void {
       let time: HTMLInputElement = document.querySelector("[key=time]");
       let date: Date = new Date(fc.Time.game.get());

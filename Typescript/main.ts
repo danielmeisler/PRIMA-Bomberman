@@ -7,9 +7,9 @@ namespace Bomberman {
   export let viewport: fc.Viewport;
 
   let cmpAudio: fc.ComponentAudio;
-  let backgroundTheme: fc.Audio = new fc.Audio(".../Assets/sounds/theme.mp3");
-  let soundDeath: fc.Audio = new fc.Audio(".../Assets/sounds/death.wav");
-  let soundVictory: fc.Audio = new fc.Audio(".../Assets/sounds/victory.wav");
+  let backgroundTheme: fc.Audio = new fc.Audio("../Assets/sounds/theme.mp3");
+  let soundDeath: fc.Audio = new fc.Audio("../Assets/sounds/death.wav");
+  let soundVictory: fc.Audio = new fc.Audio("../Assets/sounds/victory.wav");
 
   export let root: fc.Node = new fc.Node("Root");
   export let levelRoot: fc.Node = new fc.Node("LevelNode");
@@ -27,7 +27,9 @@ namespace Bomberman {
 
   async function hndLoad(_event: Event): Promise<void> {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
-    await communicate("data.json");
+    await communicate("../Typescript/data.json");
+    
+    GameObject.start();
 
     cmpAudio = new fc.ComponentAudio(backgroundTheme, true, false);
     cmpAudio.connect(true);
@@ -84,14 +86,16 @@ namespace Bomberman {
     viewport.draw();
   }
 
+  // Levelauswahl und Generierung des Levels.
   function createArena(_level: number): void {
     let levelTest: LevelBuilder = new LevelBuilder();
     levelTest.createLevel(_level);
   }
 
+  // Avatar wird generiert und platziert.
   async function hndAvatar(): Promise<Avatar> {
     let txtAvatar: fc.TextureImage = new fc.TextureImage();
-    txtAvatar.load(".../Assets/avatar/avatar_sprites.png");
+    txtAvatar.load("../Assets/avatar/avatar_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtAvatar);
     Avatar.generateSprites(coatSprite);
 
@@ -100,9 +104,10 @@ namespace Bomberman {
     return avatar;
   }
 
+  // Enemy 1 wird generiert und oben links der Arenagröße platziert.
   async function hndEnemies(): Promise<Enemy> {
     let txtEnemy: fc.TextureImage = new fc.TextureImage();
-    txtEnemy.load(".../Assets/enemies/enemy_sprites.png");
+    txtEnemy.load("../Assets/enemies/enemy_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtEnemy);
     Enemy.generateSprites(coatSprite);
 
@@ -111,9 +116,10 @@ namespace Bomberman {
     return enemies;
   }
 
+  // Enemy 2 wird generiert und oben rechts der Arenagröße platziert.
   async function hndEnemies2(): Promise<Enemy2> {
     let txtEnemy: fc.TextureImage = new fc.TextureImage();
-    txtEnemy.load(".../Assets/enemies/enemy_sprites.png");
+    txtEnemy.load("../Assets/enemies/enemy_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtEnemy);
     Enemy2.generateSprites(coatSprite);
 
@@ -122,9 +128,10 @@ namespace Bomberman {
     return enemies2;
   }
 
+  // Enemy 3 wird generiert und unten rechts der Arenagröße platziert.
   async function hndEnemies3(): Promise<Enemy3> {
     let txtEnemy: fc.TextureImage = new fc.TextureImage();
-    txtEnemy.load(".../Assets/enemies/enemy_sprites.png");
+    txtEnemy.load("../Assets/enemies/enemy_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtEnemy);
     Enemy3.generateSprites(coatSprite);
 
@@ -133,37 +140,42 @@ namespace Bomberman {
     return enemies3;
   }
 
+  // Bomben und Sprites werden generiert.
   async function hndBomb(): Promise<void> {
     let txtBomb: fc.TextureImage = new fc.TextureImage();
-    txtBomb.load(".../Assets/items/bomb_sprites.png");
+    txtBomb.load("../Assets/items/bomb_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtBomb);
     let txtBombExplode: fc.TextureImage = new fc.TextureImage();
-    txtBombExplode.load(".../Assets/items/bomb_explode.png");
+    txtBombExplode.load("../Assets/items/bomb_explode.png");
     let coatSprite2: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtBombExplode);
     Bomb.generateSprites(coatSprite, coatSprite2);
   }
 
+  // Flammen und Sprites werden generiert.
   async function hndFlames(): Promise<void> {
     let txtFlames: fc.TextureImage = new fc.TextureImage();
-    txtFlames.load(".../Assets/items/flames_sprites.png");
+    txtFlames.load("../Assets/items/flames_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtFlames);
     Flames.generateSprites(coatSprite);
   }
 
+  // Portale und Sprites werden generiert.
   async function hndPortal(): Promise<void> {
     let txtTeleport: fc.TextureImage = new fc.TextureImage();
-    txtTeleport.load(".../Assets/tiles/portal_sprites.png");
+    txtTeleport.load("../Assets/tiles/portal_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtTeleport);
     Portal.generateSprites(coatSprite);
   }
 
+  // Items und Sprites werden generiert.
   async function hndItems(): Promise<void> {
     let txtItems: fc.TextureImage = new fc.TextureImage();
-    txtItems.load(".../Assets/items/items_sprites.png");
+    txtItems.load("../Assets/items/items_sprites.png");
     let coatSprite: fc.CoatTextured = new fc.CoatTextured(clrWhite, txtItems);
     Items.generateSprites(coatSprite);
   }
 
+  // Überprüfung ob das Spiel vorbei ist und wer gewonnen hat.
   export function hndDeaths(): void {
     if (gameState.bottomLeft <= 0) {
 
@@ -219,11 +231,10 @@ namespace Bomberman {
 
       (<HTMLDivElement>document.getElementById("gameOverDIV")).appendChild(gameOver);
     }
-
   }
 
+  // Neustart des Spiels.
   function hndRestart(_event: Event): void {
     location.reload();
   }
-
 }

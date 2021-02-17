@@ -6,10 +6,11 @@ namespace Bomberman {
     enemyLives1: number;
     enemyLives2: number;
     enemyLives3: number;
-  }
-
-  export interface Data {
-    settings: GameSettings;
+    maxBomb: number;
+    maxBombEnemy: number;
+    maxBombEnemy2: number;
+    maxBombEnemy3: number;
+    godmode: boolean;
   }
 
   export let gameSettings: GameSettings;
