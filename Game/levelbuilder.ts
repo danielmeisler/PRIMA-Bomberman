@@ -11,13 +11,13 @@ namespace Bomberman {
       this.createBorder();
 
       if (_level == 1)
-      this.createBlocks();
+        this.createBlocks();
 
       if (_level == 2)
-      this.createBlocks2();
+        this.createBlocks2();
 
       if (_level == 3)
-      this.createBlocks3();
+        this.createBlocks3();
 
       return new LevelBuilder();
     }
@@ -55,7 +55,7 @@ namespace Bomberman {
       levelRoot.appendChild(new Portal(new fc.Vector2(1, 4), 0));
       levelRoot.appendChild(new Portal(new fc.Vector2(10, 7), 1));
       levelRoot.appendChild(new Portal(new fc.Vector2(19, 4), 2));
-      levelRoot.appendChild(new Portal(new fc.Vector2(10, 1), 3));      
+      levelRoot.appendChild(new Portal(new fc.Vector2(10, 1), 3));
 
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(1, 3)));
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(1, 5)));
@@ -98,7 +98,7 @@ namespace Bomberman {
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(3, 1)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(3, 4)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(3, 7)));
-    
+
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 1)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 3)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(4, 4)));
@@ -109,10 +109,10 @@ namespace Bomberman {
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(5, 3)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(5, 5)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(5, 6)));
-      
+
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 2)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(6, 6)));
-      
+
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(7, 4)));
 
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(8, 2)));
@@ -145,7 +145,7 @@ namespace Bomberman {
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(15, 3)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(15, 5)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(15, 6)));
-          
+
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 1)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 3)));
       explodableBlockNode.appendChild(new ExplodableBlock(fc.Vector2.ONE(1), new fc.Vector2(16, 4)));
@@ -211,7 +211,7 @@ namespace Bomberman {
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(15, 6)));
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(15, 7)));
 
-      
+
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(17, 2)));
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(17, 6)));
 
@@ -303,7 +303,7 @@ namespace Bomberman {
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(3, 6)));
 
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(4, 4)));
-      
+
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(6, 2)));
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(6, 4)));
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(6, 6)));
@@ -311,10 +311,10 @@ namespace Bomberman {
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(7, 4)));
 
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(8, 4)));
-      
+
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 1)));
-      wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 3)));  
-      wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 5)));  
+      wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 3)));
+      wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 5)));
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(10, 7)));
 
       wallsNode.appendChild(new Wall(fc.Vector2.ONE(1), new fc.Vector2(12, 4)));

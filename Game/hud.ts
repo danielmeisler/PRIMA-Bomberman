@@ -34,10 +34,10 @@ namespace Bomberman {
       let time: HTMLInputElement = document.querySelector("[key=time]");
       let date: Date = new Date(fc.Time.game.get());
       time.value =
-          String(date.getMinutes()).padStart(2, "0") + ":" +
-          String(date.getSeconds()).padStart(2, "0");
+        String(date.getMinutes()).padStart(2, "0") + ":" +
+        String(date.getSeconds()).padStart(2, "0");
 
       window.requestAnimationFrame(Hud.loop);
-  }
+    }
   }
 }

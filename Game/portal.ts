@@ -3,7 +3,7 @@ namespace Bomberman {
   import fcAid = FudgeAid;
 
   let cmpAudio: fc.ComponentAudio;
-  let soundTeleport: fc.Audio = new fc.Audio("Assets/sounds/teleport.wav");
+  let soundTeleport: fc.Audio = new fc.Audio(".../Assets/sounds/teleport.wav");
 
   let portalArray: fc.Vector2[] = [];
 

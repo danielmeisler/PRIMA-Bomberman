@@ -5,11 +5,10 @@ namespace Bomberman {
   import fcAid = FudgeAid;
 
   let cmpAudio: fc.ComponentAudio;
-  let soundWalk: fc.Audio = new fc.Audio("Assets/sounds/walk.wav");
-  let soundItems: fc.Audio = new fc.Audio("Assets/sounds/items.mp3");
+  let soundWalk: fc.Audio = new fc.Audio(".../Assets/sounds/walk.wav");
+  let soundItems: fc.Audio = new fc.Audio(".../Assets/sounds/items.mp3");
 
   export class Avatar extends GameObject {
-    //private static readonly mtrColorAvatar: fc.Material = new fc.Material("BaseColor", fc.ShaderUniColor, new fc.CoatColored(fc.Color.CSS("YELLOW")));
     private static animations: fcAid.SpriteSheetAnimations;
     public job: WALK = WALK.DOWN;
     public tempPos: fc.Vector3;
@@ -17,9 +16,6 @@ namespace Bomberman {
 
     public constructor(_position: fc.Vector2) {
       super("Bomberman", new fc.Vector2(0.8, 0.8), _position);
-
-      /*   let cMaterial: fc.ComponentMaterial = new fc.ComponentMaterial(Avatar.mtrColorAvatar);
-           this.addComponent(cMaterial);*/
 
       this.sprite = new fcAid.NodeSprite("AvatarSprite");
       this.sprite.addComponent(new fc.ComponentTransform());

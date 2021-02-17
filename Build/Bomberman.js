@@ -48,8 +48,8 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundWalk = new fc.Audio("Assets/sounds/walk.wav");
-    let soundItems = new fc.Audio("Assets/sounds/items.mp3");
+    let soundWalk = new fc.Audio(".../Assets/sounds/walk.wav");
+    let soundItems = new fc.Audio(".../Assets/sounds/items.mp3");
     class Avatar extends Bomberman.GameObject {
         constructor(_position) {
             super("Bomberman", new fc.Vector2(0.8, 0.8), _position);
@@ -61,8 +61,6 @@ var Bomberman;
             this.setLifeLimiter = () => {
                 Bomberman.lifeLimiter = false;
             };
-            /*   let cMaterial: fc.ComponentMaterial = new fc.ComponentMaterial(Avatar.mtrColorAvatar);
-                 this.addComponent(cMaterial);*/
             this.sprite = new fcAid.NodeSprite("AvatarSprite");
             this.sprite.addComponent(new fc.ComponentTransform());
             this.sprite.mtxLocal.translateY(-0.25);
@@ -237,7 +235,7 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundBomb = new fc.Audio("Assets/sounds/explosion.wav");
+    let soundBomb = new fc.Audio(".../Assets/sounds/explosion.wav");
     class Bomb extends Bomberman.GameObject {
         constructor(_size, _position, _source) {
             super("Bomb", _size, _position);
@@ -1290,7 +1288,7 @@ var Bomberman;
         constructor(_size, _position) {
             super("ExplodableBlock", _size, _position);
             let txtWall = new fc.TextureImage();
-            txtWall.load("Assets/tiles/ExplodableBlock.png");
+            txtWall.load(".../Assets/tiles/ExplodableBlock.png");
             let mtrWall = new fc.Material("ExplodableBlockMaterial", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtWall));
             let cmpMaterial = new fc.ComponentMaterial(mtrWall);
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;
@@ -1305,7 +1303,7 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundHit = new fc.Audio("Assets/sounds/hit.wav");
+    let soundHit = new fc.Audio(".../Assets/sounds/hit.wav");
     Bomberman.flameDistance = 2;
     class Flames extends Bomberman.GameObject {
         constructor(_position) {
@@ -1460,7 +1458,7 @@ var Bomberman;
         constructor(_size, _position) {
             super("Floor", _size, _position);
             let txtFloor = new fc.TextureImage();
-            txtFloor.load("Assets/tiles/BackgroundTile.png");
+            txtFloor.load(".../Assets/tiles/BackgroundTile.png");
             let mtrFloor = new fc.Material("Floor", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtFloor));
             let cmpMaterial = new fc.ComponentMaterial(mtrFloor);
             this.mtxLocal.translation = new fc.Vector3(_position.x + _size.x / 2 - 0.5, _position.y + _size.y / 2 - 0.5, -0.000001);
@@ -1896,9 +1894,9 @@ var Bomberman;
     window.addEventListener("load", hndLoad);
     Bomberman.clrWhite = fc.Color.CSS("WHITE");
     let cmpAudio;
-    let backgroundTheme = new fc.Audio("Assets/sounds/theme.mp3");
-    let soundDeath = new fc.Audio("Assets/sounds/death.wav");
-    let soundVictory = new fc.Audio("Assets/sounds/victory.wav");
+    let backgroundTheme = new fc.Audio(".../Assets/sounds/theme.mp3");
+    let soundDeath = new fc.Audio(".../Assets/sounds/death.wav");
+    let soundVictory = new fc.Audio(".../Assets/sounds/victory.wav");
     Bomberman.root = new fc.Node("Root");
     Bomberman.levelRoot = new fc.Node("LevelNode");
     Bomberman.floorNode = new fc.Node("FloorNode");
@@ -1955,7 +1953,7 @@ var Bomberman;
     }
     async function hndAvatar() {
         let txtAvatar = new fc.TextureImage();
-        txtAvatar.load("Assets/avatar/avatar_sprites.png");
+        txtAvatar.load(".../Assets/avatar/avatar_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtAvatar);
         Bomberman.Avatar.generateSprites(coatSprite);
         Bomberman.avatar = new Bomberman.Avatar(new fc.Vector2(1, 1));
@@ -1963,7 +1961,7 @@ var Bomberman;
     }
     async function hndEnemies() {
         let txtEnemy = new fc.TextureImage();
-        txtEnemy.load("Assets/enemies/enemy_sprites.png");
+        txtEnemy.load(".../Assets/enemies/enemy_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
         Bomberman.Enemy.generateSprites(coatSprite);
         Bomberman.enemies = new Bomberman.Enemy(new fc.Vector2(1, Bomberman.arenaSize.y - 2));
@@ -1971,7 +1969,7 @@ var Bomberman;
     }
     async function hndEnemies2() {
         let txtEnemy = new fc.TextureImage();
-        txtEnemy.load("Assets/enemies/enemy_sprites.png");
+        txtEnemy.load(".../Assets/enemies/enemy_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
         Bomberman.Enemy2.generateSprites(coatSprite);
         Bomberman.enemies2 = new Bomberman.Enemy2(new fc.Vector2(Bomberman.arenaSize.x - 2, Bomberman.arenaSize.y - 2));
@@ -1979,7 +1977,7 @@ var Bomberman;
     }
     async function hndEnemies3() {
         let txtEnemy = new fc.TextureImage();
-        txtEnemy.load("Assets/enemies/enemy_sprites.png");
+        txtEnemy.load(".../Assets/enemies/enemy_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtEnemy);
         Bomberman.Enemy3.generateSprites(coatSprite);
         Bomberman.enemies3 = new Bomberman.Enemy3(new fc.Vector2(Bomberman.arenaSize.x - 2, 1));
@@ -1987,28 +1985,28 @@ var Bomberman;
     }
     async function hndBomb() {
         let txtBomb = new fc.TextureImage();
-        txtBomb.load("Assets/items/bomb_sprites.png");
+        txtBomb.load(".../Assets/items/bomb_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtBomb);
         let txtBombExplode = new fc.TextureImage();
-        txtBombExplode.load("Assets/items/bomb_explode.png");
+        txtBombExplode.load(".../Assets/items/bomb_explode.png");
         let coatSprite2 = new fc.CoatTextured(Bomberman.clrWhite, txtBombExplode);
         Bomberman.Bomb.generateSprites(coatSprite, coatSprite2);
     }
     async function hndFlames() {
         let txtFlames = new fc.TextureImage();
-        txtFlames.load("Assets/items/flames_sprites.png");
+        txtFlames.load(".../Assets/items/flames_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtFlames);
         Bomberman.Flames.generateSprites(coatSprite);
     }
     async function hndPortal() {
         let txtTeleport = new fc.TextureImage();
-        txtTeleport.load("Assets/tiles/portal_sprites.png");
+        txtTeleport.load(".../Assets/tiles/portal_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtTeleport);
         Bomberman.Portal.generateSprites(coatSprite);
     }
     async function hndItems() {
         let txtItems = new fc.TextureImage();
-        txtItems.load("Assets/items/items_sprites.png");
+        txtItems.load(".../Assets/items/items_sprites.png");
         let coatSprite = new fc.CoatTextured(Bomberman.clrWhite, txtItems);
         Bomberman.Items.generateSprites(coatSprite);
     }
@@ -2064,7 +2062,7 @@ var Bomberman;
     var fc = FudgeCore;
     var fcAid = FudgeAid;
     let cmpAudio;
-    let soundTeleport = new fc.Audio("Assets/sounds/teleport.wav");
+    let soundTeleport = new fc.Audio(".../Assets/sounds/teleport.wav");
     let portalArray = [];
     class Portal extends Bomberman.GameObject {
         constructor(_position, portalID) {
@@ -2157,7 +2155,7 @@ var Bomberman;
         constructor(_size, _position) {
             super("Wall", _size, _position);
             let txtWall = new fc.TextureImage;
-            txtWall.load("Assets/tiles/SolidBlock.png");
+            txtWall.load(".../Assets/tiles/SolidBlock.png");
             let mtrWall = new fc.Material("BorderWall", fc.ShaderTexture, new fc.CoatTextured(Bomberman.clrWhite, txtWall));
             let cmpMaterial = new fc.ComponentMaterial(mtrWall);
             this.rect.position.x = this.mtxLocal.translation.x - this.rect.size.x / 2;

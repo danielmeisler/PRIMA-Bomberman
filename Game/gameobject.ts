@@ -37,10 +37,10 @@ namespace Bomberman {
     public checkCollision(_target: GameObject): boolean {
       let intersection: fc.Rectangle = this.rect.getIntersection(_target.rect);
       if (intersection == null) {
-          return false;
+        return false;
       }
       return true;
-     }
-    
+    }
+
   }
 }

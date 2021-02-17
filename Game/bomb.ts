@@ -5,7 +5,7 @@ namespace Bomberman {
   import fcAid = FudgeAid;
 
   let cmpAudio: fc.ComponentAudio;
-  let soundBomb: fc.Audio = new fc.Audio("Assets/sounds/explosion.wav");
+  let soundBomb: fc.Audio = new fc.Audio(".../Assets/sounds/explosion.wav");
 
   export class Bomb extends GameObject {
     private static animations: fcAid.SpriteSheetAnimations;

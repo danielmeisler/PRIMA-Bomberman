@@ -3,7 +3,7 @@ namespace Bomberman {
   import fcAid = FudgeAid;
 
   let cmpAudio: fc.ComponentAudio;
-  let soundHit: fc.Audio = new fc.Audio("Assets/sounds/hit.wav");
+  let soundHit: fc.Audio = new fc.Audio(".../Assets/sounds/hit.wav");
 
   export let flameDistance: number = 2;
 
