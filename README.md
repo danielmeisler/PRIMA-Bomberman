@@ -1,5 +1,5 @@
 # PRIMA-Bomberman
-Endabgabe PRIMA
+Endabgabe PRIMA Daniel Meisler
 
 Spiel GITHUB-PAGES:
 <a href="https://danielmeisler.github.io/PRIMA-Bomberman/Build/index.html">Bomberman</a>
