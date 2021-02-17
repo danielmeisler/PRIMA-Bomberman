@@ -12,5 +12,7 @@ Designdokument:
 Codes:
 <br>
 <a href="https://github.com/danielmeisler/PRIMA-Bomberman/tree/main/Build">HTML & JavaScript</a>
+<br>
 <a href="https://github.com/danielmeisler/PRIMA-Bomberman/tree/main/Typescript">TypeScript</a>
+<br>
 <a href="https://github.com/danielmeisler/PRIMA-Bomberman/tree/main/Assets">Assets</a>
