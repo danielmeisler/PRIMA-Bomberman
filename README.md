@@ -7,7 +7,7 @@ Spiel GITHUB-PAGES:
 
 Designdokument:
 <br>
-<a href="#">Konzept</a>
+<a href="https://github.com/danielmeisler/PRIMA-Bomberman/blob/main/Bomberman_Designdokument.pdf">Konzept</a>
 
 Codes:
 <br>
